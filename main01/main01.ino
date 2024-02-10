@@ -1,32 +1,54 @@
-//#include "pixeltypes.h"
-//#include "FastLED.h"
-//#include <pico_relay.h>
-#include <Wire.h>
-#include <string.h>
-#include <C:\Users\Admin\Documents\frc\2024-robot-bling\colorPalette.h>
+/*
+use this instead of delay(miliseconds);
 
-#define COLOR_ORDER GRB
-#define NUM_LEDS 30
-#define BRIGHTNESS 75
-#define DATA_PIN 16 // Robot data ouput pin
-#define LED_TYPE   WS2811
 
-static char buff[10];
-bool char_in = false;
+bool isTimerDone = false;
+void setup() {
+  long int startingNum = millis();
+  //  Serial.begin(9600);
+  Serial.println("started timer");
+  isTimerDone = true;
+}
 
-CRGB leds[NUM_LEDS];
+void loop() {
+  if (isTimerDone && ((millis() - startingNum) >= 10000)){
+    isTimerDone = true;
+    //Serial.println("10 seconds ellapsed");
+  }
+  
+}
+*/
 
-void recv(int len) {
+#include "FastLED.h"                                                   //LED strip lib
+#include <Wire.h>                                                      //I2C lib
+//#include <string.h> 
+#include <C:\Users\Admin\Documents\frc\2024-robot-bling\colorPalette.h>// color palette header file
+
+#define COLOR_ORDER GRB                                                // make the order RGB
+#define NUM_LEDS 30                                                    //30 LEDs on the strip
+#define BRIGHTNESS 75                                                  //LED brightness
+#define DATA_PIN 16                                                    // Robot data ouput pin
+#define LED_TYPE   WS2811                                              //i'm honestley not sure what this does
+
+////////////////////////////////////////////////////////////////////////////
+
+static char buff[10];                                                   // array of charicters for the buffer
+bool char_in = false;                                                   //set to TRUE when receving communication from I2C
+CRGB leds[NUM_LEDS];                                                    // array of LEDs (length is NUM_LEDS)
+bool runIdle = true;                                                    // is idle on?
+
+////////////////////////////////////////////////////////////////////////////
+
+void recv(int len) {                                                    // function to receve data via I2C
   int i;
   // Just stuff the sent bytes into a global that the main routine can pick up and use
   for (i = 0; i < len; i++) buff[i] = Wire.read();
   buff[i] = 0;
   char_in =  true;
 }
+//////////////////////////////////////////////////////////////////////////// 
 
-
-
-void FillLEDsFromPaletteColors( uint8_t colorIndex)
+void setPallete( uint8_t colorIndex)                                    //function to set the palette to whatever we want
 {
     uint8_t brightness = 255;
     
@@ -36,34 +58,48 @@ void FillLEDsFromPaletteColors( uint8_t colorIndex)
     }
 }
 
+////////////////////////////////////////////////////////////////////////////
+  int setOneColor(CRGB (stripColor), int onTime){
+   for (int j = 0; j < NUM_LEDS; j++) {                                 // i is ALL of the leds
+    leds[j] = CRGB(stripColor);                                         // make all LEDs the specified color
+  }                                                                     // end of for loop
+  
+  FastLED.show();                                                       // show LEDs
+  FastLED.delay (onTime);                                               // WAIT for the specified ammount of time
+  
+  for (int j = 0; j < NUM_LEDS; j++) {                                  // J is all of the LEDs
+    leds[j] = CRGB(0,0,0);                                              // turn all LEDs off
+  }                                                                     //end of for loop
+  
+  return(0);
+  
+  }//end of function
+
+////////////////////////////////////////////////////////////////////////////
+//what to do when not communicating with driver
+int idle (){
+    setPallete(0);
+//    startIndex = startIndex + 5;                                      // motion speed
+    FastLED.setBrightness(  BRIGHTNESS );                               // set the brightness to "brightness"
+//    setPallete(startIndex);
+    FastLED.show();                                                     // show LEDs
+  return(0);
+}
+////////////////////////////////////////////////////////////////////////////
 void setup() {
-  currentPalette = RainbowColors_p;
-  currentBlending = LINEARBLEND;
+  idle();                                                               
+  currentPalette = RainbowColors_p;       
+  currentBlending = LINEARBLEND;          
   Wire.setSDA(8);
   Wire.setSCL(9);
   Wire.onReceive(recv);
   Wire.begin(0x30);
   delay(200);
   FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER> (leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-
+  idle();
 }
 
-
-
-
-//CRGB purple     = CHSV( HUE_PURPLE, 255, 255);
-//CRGB color[9] = {
-// CRGB(0,150,0)        // green      0
-//,CRGB(255,208,0)      // yellow     1
-//,CRGB(196,0,255)      // purple     2
-//,CRGB(28,0,224)       // blue       3
-//,CRGB(0,255,251)      // lightBlue  4
-//,CRGB(255 ,225 ,225); // white      5
-//,CRGB(59  ,43  ,11 ); // brown      6
-//,CRGB(227 ,0   ,255);//9
-//};
-
-
+////////////////////////////////////////////////////////////////////////////
 CRGB green      = CRGB(0   , 150 , 0  ); //    1
 CRGB yellow     = CRGB(255 , 208 , 0  ); //    2
 CRGB purple     = CRGB(196 , 0   , 255); //    3
@@ -74,93 +110,47 @@ CRGB white      = CRGB(255 , 225 , 225); //    7
 CRGB brown      = CRGB(89  , 73  , 41 ); //    8
 CRGB pink       = CRGB(237 , 0   , 205); //    9
 
+////////////////////////////////////////////////////////////////////////////
 
 
 String stringInput = "";
-int color = 6;
 static uint8_t startIndex = 0;
 
+////////////////////////////////////////////////////////////////////////////
 void loop() {
   
-    startIndex = startIndex + 1; /* motion speed */
-    FastLED.setBrightness(  BRIGHTNESS );
-    FillLEDsFromPaletteColors( startIndex);
-    
-    FastLED.show();
-    FastLED.delay(1000 / UPDATES_PER_SECOND);
-
+  if (runIdle == true){
+  idle();
+  }
 
   if (char_in == true){
      char_in = false;
      stringInput = buff;
      Serial.println(stringInput);
-  }
+
     if (stringInput == "aaa") {
-    color = 10;
-  }
-  
+     setOneColor(lightBlue, 100000);
+   }//end of if statement
+   
   if (stringInput == "bbb") {
-    color = 1;
-  }  
+      setOneColor(red, 1000);
+  }//end of if statement
+
   if (stringInput == "ccc") {
-    color = 4;
-  }
+      setOneColor(green, 1000); 
+  }//end of if statement
   
+  }//end of if char in = true
   Serial.printf("buff: '%s'\r\n", buff);
   Wire.requestFrom(0x30, 6);
   Serial.print("\nrecv: '");
   while (Wire.available()) {
   Serial.print((char)Wire.read());
   }
-  for (int i = 0; i < NUM_LEDS; i++) {
-    if (color == 1) {
-      leds[i] = CRGB(green);
-    }//end of if
 
-    if (color == 2) {
-      leds[i] = CRGB(yellow);
-    }//end of if
 
-    if (color == 3) {
-      leds[i] = CRGB(purple);
-    }//end of if
 
-    if (color == 4) {
-      leds[i] = CRGB(blue);
 
-    }//end of if
-
-    if (color == 5) {
-      leds[i] = CRGB(green);
-    }//end of if
-
-    if (color == 6) {
-      leds[i] = CRGB(lightBlue);
-    }//end of if
-
-    if (color == 7) {
-      leds[i] = CRGB(white);
-
-    }//end of if
-
-    if (color == 8) {
-      leds[i] = CRGB(brown);
-    }//end of if
-
-    if (color == 9) {
-      leds[i] = CRGB(pink);
-    }//end of if
-
-    if (color == 10) {
-      leds[i] = CRGB(red);
-    }//end of if
-
-  //}end of for loop
-  
-
-//
-  
   FastLED.show();
-  //    delay(1000);
 
 }//end of loop()
