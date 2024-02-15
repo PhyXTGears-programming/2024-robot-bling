@@ -1,6 +1,8 @@
 
 //#include <stdio.h>
+#include <iostream>
 
+// Recording the timestamp at the start of the code
 const int pin2 = 2;
 bool pin2Status = false;
 int n;
@@ -15,27 +17,20 @@ void setup() {
 
 void loop() {
   Serial.printf("%s, \n","C0: Waiting in loop()"); 
-  delay(3000);
+  delay(1000);
 }
 
 void intFunc() {
+  reportInt();
   digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  print_a();
   delay(100);                       // wait for a second
   digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-  print_b();
   delay(100); 
 }
 
-void print_a(){
-  Serial.printf("%s, \n","C0: interrupt triggered");
-  Serial.printf("%s, \n","C0: in print_a() function");
-  }
-
-void print_b(){
-  Serial.printf("%s, \n","C0: print_b() function");
-  }
-
+void reportInt(){
+  Serial.printf("%s, \n","C0: Interrupt triggered:");
+}
 
 // Running on core1
 void setup1() {
