@@ -1,69 +1,75 @@
 
+#include <iostream>
 #include "FastLED.h"
 
-class ledStrip(CRGB)
-{
+class ledTimer {
   // Class Member Variables
+  // These filled at init
+  String timerLabel;  // Name of timer for use print statements
+  bool timerStatus;   // State used to enable timer
+    
   // These are initialized in Setup()
-  int ledPin;      // the number of the LED pin
+  bool timerRepeat;   // Set True if timer repeats
   long OnTime;     // milliseconds of on-time
   long OffTime;    // milliseconds of off-time
 
   // These maintain the current state
-  bool timerStatus;               // State used to enable timer
-  int ledState;                 // ledState used to set the LED
-  unsigned long previousMillis;   // will store last time change was made
+  unsigned long previousMillis; // will store last time change was made
+  bool timerOnOff;              // True when timer is in on-time
   
-  // Constructor - creates a Flasher and initializes the member variables and state
+  // Constructor - creates a ledTimer and initializes some member variables and state
   public:
-  ledStrip(bool startStatus, int pin) {
+  ledTimer(bool startStatus, String newLabel){
     timerStatus = startStatus;
-    ledPin = pin;
-    pinMode(ledPin, OUTPUT);
+    timerLabel = newLabel;
   }
 
-  void Setup(bool newStatus, int newOnTime, int newOffTime){
+  void Setup(bool newStatus, bool newRepeat, int newOnTime, int newOffTime){
     previousMillis = millis();
     OnTime = newOnTime;
     OffTime = newOffTime;
     timerStatus = newStatus;
+    timerRepeat = newRepeat;
     Serial.begin(115200);
+    delay(3000);
     Serial.printf("Status: %s, On time: %d ms, Off time: %d ms \n", timerStatus, OnTime,OffTime);
   } // End of Setup() function
   
-  /*
   void Update() {
-    // check to see if it's time to change the state of the LED
+    // check to see if it's time to make a change
     unsigned long currentMillis = millis();
      
-    if((timerStatus == true) && (ledState == HIGH) && (currentMillis - previousMillis >= OnTime))
+    //Check if timer on-time is expired
+    if((timerStatus == true) && (timerOnOff == true) && (currentMillis - previousMillis >= OnTime))
     {
-      // Turn it off
-      ledState = LOW;  // Turn it off
-      previousMillis = currentMillis;  // Remember the time
-      digitalWrite(ledPin, ledState);  // Update the actual LED
-      Serial.printf("Turn off the LED \n");
-    }
-    else if ((timerStatus == true) && (ledState == LOW) && (currentMillis - previousMillis >= OffTime))
+      if (timerRepeat == true){
+        previousMillis = currentMillis;  // Remember the time
+        timerOnOff = false;
+        Serial.printf("Finished on-time \n");
+      }
+      else {
+        timerStatus = false;
+      }
+    } // End Timer On
+
+    //Check if timer off-time is expired
+    else if ((timerStatus == true) && (timerOnOff == false) && (currentMillis - previousMillis >= OffTime))
     {
-      // turn it on
-      ledState = HIGH;  // Turn it off
-      previousMillis = currentMillis;   // Remember the time
-      digitalWrite(ledPin, ledState);   // Update the actual LED
-      Serial.printf("Turn on the LED \n");
+      timerOnOff = true;
+      Serial.printf("Finished off-time \n");
     }
   } // End of Update() function
-*/
-
-}; //End of ledStrip Class
 
 
+}; //End of ledTimer Class
 
-ledStrip led1(false,LED_BUILTIN);
+
+
+ledTimer led1(false,"LED 1 String");
 
 void setup()
 {
-led1.Setup(true,1000,2000);
+led1.Setup(true,true,10000,10000);
 }
 
 void loop()
