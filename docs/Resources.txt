@@ -1,0 +1,18 @@
+attachInterrupt()
+https://www.arduino.cc/reference/en/language/functions/external-interrupts/attachinterrupt/
+
+Interrupts
+https://gammon.com.au/interrupts
+
+C++ Inheritance
+https://www.tutorialspoint.com/cplusplus/cpp_inheritance.htm
+
+Inheritance in C++
+https://www.geeksforgeeks.org/inheritance-in-c/
+
+How does inheritance actually work?
+https://stackoverflow.com/questions/42280613/how-does-inheritance-actually-work
+
+Friendship and inheritance
+https://cplusplus.com/doc/tutorial/inheritance/
+
