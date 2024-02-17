@@ -17,6 +17,7 @@ class ledTimer {
   unsigned long previousMillis; // will store last time change was made
   bool timerOnOff;              // True when timer is in on-time
   
+
   // Constructor - creates a ledTimer and initializes some member variables and state
   public:
   ledTimer(bool startStatus, String newLabel){
