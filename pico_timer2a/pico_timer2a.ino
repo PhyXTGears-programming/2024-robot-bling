@@ -12,25 +12,6 @@
 #define ledPin3 18          // Led Strip 3 ouput pin
 #define ledPin4 19          // Led Strip 4 ouput pin
 #define LED_TYPE WS2811  
-#define ARRAY_LED1 101
-#define ARRAY_LED2 102
-#define ARRAY_LED3 103
-#define ARRAY_LED4 104
-
-#define ARRAY_RED   111
-#define ARRAY_GREEN 112
-#define ARRAY_BLUE  113
-#define ARRAY_YELLOW 114
-
-#define ARRAY_ON 121
-#define ARRAY_OFF 122
-
-std::array<int,4> array1{ARRAY_LED1, ARRAY_RED, ARRAY_ON, 0};
-std::array<int,4> array2{ARRAY_LED1, ARRAY_GREEN, ARRAY_ON, 0};
-std::array<int,4> array3{ARRAY_LED1, ARRAY_BLUE, ARRAY_ON, 0};
-std::array<int,4> array4{ARRAY_LED1, ARRAY_YELLOW, ARRAY_ON, 0};
-std::array<int,4> array5{ARRAY_LED1, ARRAY_RED, 450, 450};
-
 
 //#########################################################################
 class LedTimer {
@@ -40,69 +21,73 @@ class LedTimer {
   String timerLabel;  // Name of timer for use print statements
     
   // These are initialized in Setup()
-  bool timerRepeat;   // Set True if timer repeats
   long onTime;     // milliseconds of on-time
   long offTime;    // milliseconds of off-time
-  long endTime;   // eleapsed time when timer will stop
+  long endTime;   // elapsed time when timer will stop
 
   // These maintain the current state
   unsigned long previousTime; // will store last time change was made
-  bool timerOnOff;            // True when timer is in on-time
+  unsigned long currentTime; // will store current time
+  bool timerOnOff;            // True when timer is in on-time (Repeat mode)
   bool timerStatus = false;   // State used to enable timer  
 
-  // Constructor - creates a LedTimer and initializes some member variables and state
+  // Constructor - creates an LedTimer and initializes some member variables
   public:
   LedTimer(String newLabel){
     timerLabel = newLabel;
-  }
-  void timerRepeatSetup(bool newStatus, int newOnTime, int newOffTime, int newRunTime){
+  } // End Create Timer
+  void timerRepeatSetup(int newOnTime, int newOffTime, int newRunTime){
     onTime = newOnTime;
     offTime = newOffTime;
-    timerStatus = newStatus;
+    timerStatus = true;
     previousTime = millis();
     endTime = previousTime + newRunTime;
   } // End of timerRepeatSetup()
 
-  void timerOnceSetup(int newRunTime){
-    previousTime = millis();
-    endTime = previousTime + newRunTime;
-  } // End of timerOnceSetup()
-
-  bool timerOnceUpdate(){
-    unsigned long currentTime;
-    currentTime = millis();
-    if ((currentTime >= endTime)) {
-      return true;
-    } // End if
-    else
-      return false;
-  } // End of timerOnceUpdate()
-  
   bool timerRepeatUpdate() {
     // check to see if it's time to make a change
-    unsigned long currentTime;
     currentTime = millis();
-    //Check if timer on-time is expired
-    if (currentTime <= endTime){
-     if((timerStatus == true) && (timerOnOff == true) && (currentTime - previousTime >= onTime)) {
+    if ((currentTime <= endTime) && (timerStatus == true) ){
+	  //Check if timer on-time is expired    
+	  if((timerOnOff == true) && (currentTime - previousTime >= onTime)) {
         previousTime = currentTime;  // Remember the time
         timerOnOff = false;
-        //remoteUpdate = timerOnOff;
-        Serial.printf("Finished on-time \n");
+        Serial.printf("Finished on-time (timerRepeatUpdate) \n");
      } // End check on-time
       //Check if timer off-time is expired
       currentTime = millis();
      if ((timerStatus == true) && (timerOnOff == false) && (currentTime - previousTime >= offTime)) {
         previousTime = currentTime;  // Remember the time
         timerOnOff = true;
-        //remoteUpdate = timerOnOff;
-        Serial.printf("Finished off-time \n");
+        Serial.printf("Finished off-time (timerRepeatUpdate) \n");
      } // End check off-time
       return timerOnOff;
     } // End if <= End time
-    else  
+    else {
+      timerStatus = false;
       return false;
+    } // End Else
   } // End of Update() function
+
+  void timerOnceSetup(int newRunTime){
+    previousTime = millis();
+    endTime = previousTime + newRunTime;
+	timerStatus = true;
+  } // End of timerOnceSetup()
+
+  bool timerOnceUpdate(){
+    currentTime = millis();
+    if ((currentTime <= endTime) && (timerStatus == true)) {
+      Serial.printf("In on-time (timerOnceUpdate) \n");
+      delay(500);
+      return true;
+	  } // End if
+    else {
+      timerStatus = false;
+  	  Serial.printf("Finish time (timerOnceUpdate) \n");
+  	  return false;
+    } // End Else
+  } // End of timerOnceUpdate()
 
 }; //End of LedTimer Class
 
@@ -111,6 +96,40 @@ LedTimer ledTimer1("LED 1 String");
 CLEDController& controller1 = FastLED.addLeds<LED_TYPE, ledPin1, COLOR_ORDER> (new CRGB[10], NUM_LEDS).setCorrection(TypicalLEDStrip);
 
 
+void setupLeds(int newMode){
+  bool runTimer = true;
+  bool ledStripOnOff1 = true;
+  controller1.showColor(CRGB::Black, 30, 45);
+  if (newMode == 4){
+      ledTimer1.timerOnceSetup(15000);
+      Serial.println("ledStripOnOff1 is: True (setupLeds)");
+      controller1.showColor(CRGB::Blue, 8, 45);
+      while (runTimer == true){
+        ledStripOnOff1 = ledTimer1.timerOnceUpdate();
+        if (ledStripOnOff1 == false){
+          Serial.println("ledStripOnOff1 is: False (setupLeds)");
+          runTimer = false;
+          controller1.showColor(CRGB::Blue, 8, 0);
+        } // End if
+      } // End while loop
+    delay(100);
+  } // End mode 4
+  if (newMode == 5){
+    ledTimer1.timerRepeatSetup(450, 450, 15000);
+    while (runTimer == true){
+      ledStripOnOff1 = ledTimer1.timerRepeatUpdate();
+      if (ledStripOnOff1 == false){
+        Serial.println("ledStripOnOff1 is: False (setupLeds)");
+        controller1.showColor(CRGB::Blue, 8, 0);
+      }
+      else {
+        Serial.println("ledStripOnOff1 is: True (SetupLEDS)");
+        controller1.showColor(CRGB::Blue, 8, 45);    
+      }
+    delay(100);
+    } // End While loop
+  } // End mode 5
+} // End setupLeds
 
 void setup() {
     Serial.begin(115200);
@@ -134,40 +153,6 @@ void loop()
   delay(100);
   */
   //setupLeds(5);
-  delay(5000);
+  //delay(5000);
   setupLeds(4);
 }
-
-void setupLeds(int newMode){
-  bool runLoop = true;
-  bool ledStripOnOff1 = true;
-  controller1.showColor(CRGB::Black, 30, 45);
-  if (newMode == 4){
-      controller1.showColor(CRGB::Green, 8, 45);
-      ledTimer1.timerOnceSetup(15000);
-      while (runLoop == true){
-        ledStripOnOff1 = ledTimer1.timerOnceUpdate();
-        if (ledStripOnOff1 == false){
-          Serial.println("ledStripOnOff1 is: False");
-          controller1.showColor(CRGB::Yellow, 8, 0);
-        } // End if
-      } // End while loop
-    delay(100);
-  } // End mode 4
-  if (newMode == 5){
-    ledTimer1.timerRepeatSetup(true, 450, 450, 15000);
-    while (runLoop == true){
-      ledStripOnOff1 = ledTimer1.timerRepeatUpdate();
-      if (ledStripOnOff1 == false){
-        Serial.println("ledStripOnOff1 is: False");
-        controller1.showColor(CRGB::Blue, 8, 0);
-      }
-      else {
-        Serial.println("ledStripOnOff1 is: True");
-        controller1.showColor(CRGB::Blue, 8, 45);    
-      }
-    delay(100);
-    } // End While loop
-  } // End mode 5
-  
-} // End setupLeds
