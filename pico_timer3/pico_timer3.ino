@@ -1,15 +1,14 @@
 
 #include <FastLED.h>
-#include <controller.h>
+//#include <controller.h>
 //#include <string>
 
 #define COLOR_ORDER GRB      // make the order RGB
 #define numLeds1 30          //30 LEDs on the strip
+#define numLeds2 30          //30 LEDs on the strip
 #define BRIGHTNESS 50        //LED brightness
 #define ledPin1 16          // Led Strip 1 ouput pin
 #define ledPin2 17          // Led Strip 2 ouput pin
-#define ledPin3 1numLeds          // Led Strip 3 ouput pin
-#define ledPin4 19          // Led Strip 4 ouput pin
 #define LED_TYPE WS2811  
 
 //#########################################################################
@@ -110,7 +109,7 @@ bool firstRun = true;
 bool runTimer = true;
 bool stripStatus1 = true;
 
-class LedStrip : virtual LedTimer, virtual CLEDController{
+class LedStrip : virtual LedTimer{
   // Class Member Variables
   // These filled at init
 	public:
@@ -121,25 +120,20 @@ class LedStrip : virtual LedTimer, virtual CLEDController{
   // These are initialized in Setup()
 	bool runTimer;
 	bool stripStatus;
-  bool firstRun;
-  //CLEDController controller = FastLED.addLeds<LED_TYPE, stripPin, COLOR_ORDER> (new CRGB[10], stripLength).setCorrection(TypicalLEDStrip);
-  
+	bool firstRun;
+   
   // These maintain the current state
 
   // Constructor - creates an LedStrip and initializes some member variables
   public:
-  LedStrip(String newLabel, int newPin, int newLength) : LedTimer (newLabel), CLEDController::CLEDController() {
+  LedStrip(String newLabel, int newPin, int newLength) : LedTimer(newLabel) {
     stripLabel = newLabel;
     stripPin = newPin;
     stripLength = newLength;
-    CLEDController::init();
-    CFastLED::addLeds<LED_TYPE, stripPin, COLOR_ORDER> (new CRGB[10], stripLength).setCorrection(TypicalLEDStrip);
   } // End Create LedStrip
   
 	void Setup() {
 		//ledTimer(stripLabel);
-		//controller = FastLED.addLeds<LED_TYPE, stripPin, COLOR_ORDER> (new CRGB[10], stripLength).setCorrection(TypicalLEDStrip);
-		controller.clearLedData();
 		runTimer = true;
 		firstRun = true;
 		stripStatus = true;
@@ -149,16 +143,16 @@ class LedStrip : virtual LedTimer, virtual CLEDController{
 		if (newMode == 4){ // Run once
 			if (firstRun == true){
 				timerOnceSetup(15000, "Mode-4");
-				controller.showColor(newColor, stripLength, brightness);
+				//controller.showColor(newColor, stripLength, brightness);
 				firstRun = false;
 			} // End if firstRun is true
 			if (runTimer == true){
 				//stripStatus = ledTimer.onceUpdate();
-        stripStatus = onceUpdate();
+				stripStatus = onceUpdate();
 				if (stripStatus == false){
 					Serial.println("Mode 4 - stripStatus is: False (Setup)");
 					runTimer = false; //Run once since mode = 4
-					controller.showColor(newColor, stripLength, 0);
+					//controller.showColor(newColor, stripLength, 0);
 				} // End if Status is false
 			} // End if runTimer is true
 			} // End mode is 4
@@ -168,11 +162,24 @@ class LedStrip : virtual LedTimer, virtual CLEDController{
 
 void setup() {
     Serial.begin(115200);
-    LedString ledString1 ("LedString 1", ledPin1, numLeds1);
+    LedStrip ledStripList[2] = {
+		  LedStrip("LedStrip 1", ledPin1, numLeds1),
+		  LedStrip("LedStrip 2", ledPin2, numLeds2)
+	};
+/**  
+	CLEDController::CLEDController controllerList[2] = {
+		CLEDController controller = FastLED.addLeds<LED_TYPE, ledPin1, COLOR_ORDER> (new CRGB[10], numLeds1).setCorrection(TypicalLEDStrip),
+		CLEDController controller = FastLED.addLeds<LED_TYPE, ledPin2, COLOR_ORDER> (new CRGB[10], numLeds2).setCorrection(TypicalLEDStrip)
+	};
+ **/
+ CRGB controllerList[2] = {
+  CRGB FastLED.addLeds<LED_TYPE, ledPin1>(ledStrip1, numLeds1),
+  CRGB FastLED.addLeds<LED_TYPE, ledPin2>(ledStrip2, numLeds2),
+ }
 }
 
 void loop() {
 	
-	ledString.stripRunOnce(4, 85, CRGB::Green);
+	//ledString.stripRunOnce(4, 85, CRGB::Green);
 
 }
