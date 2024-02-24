@@ -1,10 +1,31 @@
 
 #include <FastLED.h>
 #include <Adafruit_NeoPixel.h>
-//#include <controller.h>
-//#include <string>
 
-//#########################################################################
+/////////////////////////////////////////////////////////////////
+// Data Constants
+#define colorOrder GRB     // make the order RGB
+#define numLeds1 30         //30 LEDs on the strip
+#define numLeds2 10         //30 LEDs on the strip
+#define numLeds3 10         //30 LEDs on the strip
+#define numLeds4 10         //30 LEDs on the strip
+#define bright1 45          //brightness level 1
+#define bright2 55          //brightness level 2
+#define bright3 65          //brightness level 3
+#define bright4 75          //brightness level 4
+#define ledPin1 16          // Led Strip 1 ouput pin
+#define ledPin2 17          // Led Strip 2 ouput pin
+#define ledPin3 18         // Led Strip 3 ouput pin
+#define ledPin4 00          // Led Strip 4 ouput pin
+#define ledType WS2811  
+#define statusOff 10        // Used by stripStatus
+#define statusOn 11         // Used by stripStatus
+#define statusRepeatOn 12   // Used by stripStatus
+#define statusRepeatOff 13  // Used by stripStatus
+#define statusOnceOn 14     // Used by stripStatus
+#define statusOnceOff 15    // Used by stripStatus
+
+/////////////////////////////////////////////////////////////////
 class LedTimer {
   // Class Member Variables
   // These filled at init
@@ -26,7 +47,7 @@ class LedTimer {
   // Constructor - creates an LedTimer and initializes some member variables
   public:
   LedTimer(String newLabel){
-    modeLabel = newLabel;
+    timerLabel = newLabel;
   } // End Create Timer
   
   // Used to initialize repeat mode.
@@ -77,52 +98,31 @@ class LedTimer {
     modeLabel = newModeLabel;   
   } // End of onceSetup()
 
-  bool onceUpdate(){
+  int onceUpdate(){
     currentTime = millis();
     if ((currentTime <= endTime) && (timerStatus == true)) {
-      //Serial.printf("In on-time (onceUpdate) \n");
-      delay(500);
-      return true;
+      Serial.printf("In on-time (onceUpdate) \n");
+      delay(5);
+      return statusOn;
 	  } // End if
     else {
       timerStatus = false;
-      String outString ("Reached end time for " + timerLabel + " in " + modeLabel);
+      String outString ("Reached end time for " + timerLabel);
       Serial.println(outString);
-      timerStatus = false;
-  	  return false;
+  	  return statusOff;
     } // End Else
   } // End of onceUpdate()
 
 }; //End of LedTimer Class
 
 /////////////////////////////////////////////////////////////////
-// Data Constants
-#define colorOrder GRB     // make the order RGB
-#define numLeds1 30         //30 LEDs on the strip
-#define numLeds2 10         //30 LEDs on the strip
-#define numLeds3 10         //30 LEDs on the strip
-#define numLeds4 10         //30 LEDs on the strip
-#define bright1 45          //brightness level 1
-#define bright2 55          //brightness level 2
-#define bright3 65          //brightness level 3
-#define bright4 75          //brightness level 4
-#define ledPin1 16          // Led Strip 1 ouput pin
-#define ledPin2 17          // Led Strip 2 ouput pin
-#define ledPin3 19          // Led Strip 3 ouput pin
-#define ledPin4 00          // Led Strip 4 ouput pin
-#define ledType WS2811  
-#define statusOff 10        // Used by stripStatus
-#define statusOn 11         // Used by stripStatus
-#define statusRepeatOn 12   // Used by stripStatus
-#define statusRepeatOff 13  // Used by stripStatus
-#define statusOnceOn 14     // Used by stripStatus
-#define statusOnceOff 15    // Used by stripStatus
 
-/////////////////////////////////////////////////////////////////
 // Global parameters
-bool firstRun = true;
+bool firstRun1 = true;
+bool firstRun3 = true;
 bool runTimer = true;
-bool currentStatus;
+int currentStatus;
+int count1 = 0;
 int stripStatus1 = statusOff;
 int stripStatus3 = statusOff;
 #define picoGreen   CRGB(0   , 150 , 0  )
@@ -153,41 +153,35 @@ void setup() {
     //FastLED.addLeds< ledType, ledPin1, colorOrder> (CRGB & ledStrip1, numLeds1).setCorrection(TypicalLEDStrip);
     //FastLED.addLeds< ledType, ledPin3, colorOrder> (ledStrip3, numLeds3).setCorrection(TypicalLEDStrip);
     ledStrip1.begin(); // INITIALIZE NeoPixel strip object
+    ledStrip1.fill(ledStrip1.Color(0, 0, 0),0,numLeds1); //RGB
     ledStrip1.show(); // Set all pixel colors to 'off'
     ledStrip3.begin(); // INITIALIZE NeoPixel strip object
+    ledStrip3.fill(ledStrip1.Color(0, 0, 0),0,numLeds1); //RGB
     ledStrip3.show(); // Set all pixel colors to 'off'
     uint32_t magenta = ledStrip1.Color(255, 0, 255);
 }
 
 void loop() {
-	if (firstRun == true) {
-  //ledStrip1.show[1](picoRed, bright1);
-  //ledStrip1.setPixelColor(9, 255 , 208 , 0);
-  ledStrip1.fill(ledStrip1.Color(0, 0, 255),0,numLeds1); //RGB
-  ledStrip1.show(); 
-  ledTimer1.onceSetup(2000, "Strip 1 Red");
-  firstRun = false;
-	}
+	if (firstRun1 == true) {
+    Serial.println("Start");
+    ledStrip1.fill(ledStrip1.Color(50, 25, 5),count1,numLeds1/2); //RGB
+    ledStrip1.show(); 
+    ledTimer1.onceSetup(3000, "Strip 1");
+    firstRun1 = false;
+	} // End First Run
 	currentStatus = ledTimer1.onceUpdate();
-  if (currentStatus == false) {
-    //ledStrip1.showColor(picoBlack, bright1);
-    ledStrip1.clear(); // Set all pixel colors to 'off'  
+  if (currentStatus == statusOn) {
+    Serial.println("Current Status True");
+  }
+  else if (currentStatus == statusOff) {
+    Serial.println("Current Status False");
+    ledStrip1.fill(ledStrip1.Color(0, 0, 0),0,numLeds1); //RGB
+    //ledStrip1.clear(); // Set all pixel colors to 'off'  
     ledStrip1.show();
-    firstRun = true;
+    count1 = count1 +1;
+    firstRun1 = true;
   }
-  delay(10000);
-  if (firstRun == true) {
-  ledStrip3.fill(ledStrip1.Color(100, 50, 200),0,numLeds1); //RGB
-  ledStrip3.show(); 
-  ledTimer3.onceSetup(2000, "Strip 1 Red");
-  firstRun = false;
-  }
-  currentStatus = ledTimer1.onceUpdate();
-  if (currentStatus == false) {
-    ledStrip3.clear(); // Set all pixel colors to 'off'  
-    ledStrip3.show();
-    firstRun = true;
-  }
+  delay(3000);
 }
 
 /**
