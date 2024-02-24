@@ -11,6 +11,9 @@
 #define ledPin2 17          // Led Strip 2 ouput pin
 #define LED_TYPE WS2811  
 
+CRGB ledStrip1[numLeds1];
+CRGB ledStrip2[numLeds2];
+
 //#########################################################################
 class LedTimer {
   // Class Member Variables
@@ -172,10 +175,14 @@ void setup() {
 		CLEDController controller = FastLED.addLeds<LED_TYPE, ledPin2, COLOR_ORDER> (new CRGB[10], numLeds2).setCorrection(TypicalLEDStrip)
 	};
  **/
- CRGB controllerList[2] = {
-  CRGB FastLED.addLeds<LED_TYPE, ledPin1>(ledStrip1, numLeds1),
-  CRGB FastLED.addLeds<LED_TYPE, ledPin2>(ledStrip2, numLeds2),
- }
+  CLEDController controllerList[2] = {
+  //FastLED.addLeds<LED_TYPE, ledPin1, RGB>(ledStrip1, numLeds1),
+  //FastLED.addLeds<LED_TYPE, ledPin2>(ledStrip2, numLeds2),
+   FastLED.addLeds<LED_TYPE, ledPin1, RGB>(ledStrip1, numLeds1),
+   FastLED.addLeds<LED_TYPE, ledPin2, RGB>(ledStrip2, numLeds2)
+
+ };
+
 }
 
 void loop() {

@@ -10,7 +10,9 @@
 #define NUM_LEDS_STRIP2 30                                             // 30 LEDs on strip 2
 #define NUM_LEDS_STRIP3 30                                             // 30 LEDs on strip 3
 #define BRIGHTNESS 75                                                  // LED brightness
-#define DATA_PIN 16                                                    // Robot data ouput pin
+#define DATA_PIN1 16                                                    // Robot data ouput pin
+#define DATA_PIN2 18                                                    // Robot data ouput pin
+#define DATA_PIN3 20                                                    // Robot data ouput pin
 #define LED_TYPE   WS2811                                              // i'm honestley not sure what this does
 
 ////////////////////////////////////////////////////////////////////////////
@@ -80,14 +82,14 @@ int idle (){
     setPallete(0);
     startIndex += 7; // motion speed
     FastLED.setBrightness(  BRIGHTNESS ); // set the brightness to "brightness"
-    setPallete(startIndex+1);
+    setPallete(startIndex);
     FastLED.show();  // show LEDs
   return(0);
 }
 ////////////////////////////////////////////////////////////////////////////
 void setup() {
-  currentPalette = RainbowColors_p;       
-  currentBlending = LINEARBLEND;          
+  currentPalette = RainbowColors_p;
+  currentBlending = LINEARBLEND;
   Wire.setSDA(8);
   Wire.setSCL(9);
   Wire.onReceive(recv);
@@ -141,7 +143,7 @@ void loop() {
   }
 
 
-
+startIndex += 2;
 
 }//end of loop()
 
