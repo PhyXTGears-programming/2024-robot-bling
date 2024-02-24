@@ -42,9 +42,7 @@ class LedTimer {
   // These maintain the current state
   unsigned long previousTime; // will store last time change was made
   unsigned long currentTime;  // will store current time
-  int timerOnOff;            // True when timer is in on-time (Repeat mode)
-  bool timerStatus = false;   // State used to enable timer  
-  String modeLabel;           // Used in print statements
+  int timerOnOff;            // Used in timer Repeat mode
 
   // Constructor - creates an LedTimer and initializes some member variables
   public:
@@ -53,22 +51,30 @@ class LedTimer {
   } // End Create Timer
   
   // Used to initialize repeat mode.
-  void repeatSetup(int newOnTime, int newOffTime, int newRunTime, String newModeLabel){
+  void repeatSetup(int newOnTime, int newOffTime, int newRunTime){
     onTime = newOnTime;
     offTime = newOffTime;
-    timerStatus = true;      // Start in On-Time
     previousTime = millis(); //Time now. Timer has started
     endTime = previousTime + newRunTime;
-    modeLabel = newModeLabel;
+    timerOnOff = repeatOnTime; //Start in on-time
   } // End of repeatSetup()
 
   int repeatUpdate() {
-    int localStatus;
-    String localString;
+    int localStatus; // Used in return statements
+    String localString; // Used in print statements
     // check to see if it's time to make a change
     currentTime = millis();
-    if ((currentTime <= endTime) && (timerStatus == true) ){
-	  //Check if timer on-time is expired    
+    if (currentTime <= endTime) {
+    //Check if timer is in on-time
+    currentTime = millis();
+    if((timerOnOff == repeatOnTime) && (currentTime - previousTime < onTime)) {
+        localString = ("Running in on-time for " + timerLabel);
+        Serial.println(localString);
+        localString = ("");
+        localStatus = statusRepeatOn; // Still in on-time
+     } // End check on-time
+	  //Check if timer on-time is expired  
+    currentTime = millis();
 	  if((timerOnOff == repeatOnTime) && (currentTime - previousTime >= onTime)) {
         previousTime = currentTime;  // Remember the time
         timerOnOff = repeatOffTime; // Ready to start off-time
@@ -77,49 +83,56 @@ class LedTimer {
         localString = ("");
         localStatus = statusRepeatOff; // Now in Off-time
      } // End check on-time
-      //Check if timer off-time is expired
-      currentTime = millis();
-     if ((timerOnOff == repeatOffTime) && (currentTime - previousTime >= offTime)) {
+    //Check if timer is in off-time
+    currentTime = millis();
+    if((timerOnOff == repeatOnTime) && (currentTime - previousTime < offTime)) {
+        localString = ("Running in off-time for " + timerLabel);
+        Serial.println(localString);
+        localString = ("");
+        localStatus = statusRepeatOff; // Still in off-time
+     } // End check off-time
+    //Check if timer off-time is expired
+    currentTime = millis();
+    if ((timerOnOff == repeatOffTime) && (currentTime - previousTime >= offTime)) {
         previousTime = currentTime;  // Remember the time
-        timerOnOff = repeatOnTime; // Ready to start on-time
+        timerOnOff = repeatOnTime;   // Ready to start on-time
         localString = ("Finished off-time for " + timerLabel);
         Serial.println(localString);
         localString = ("");
         localStatus = statusRepeatOn; // Now in On-time
-     } // End check off-time
+    } // End check off-time
     } // End if <= End time
+    // Check if End-time is reached
     currentTime = millis();
     if (currentTime > endTime){ // Reached end time
-        timerStatus = false;
         localString = ("Reached end time for " + timerLabel);
         Serial.println(localString);
         localString = ("");
-        localStatus =  statusOff;
+        localStatus =  statusOff; // On/Off cycle is over
     } // End if reached end-time
     return localStatus;
   } // End of repeatUpdate()
 
-  void onceSetup(int newRunTime, String newModeLabel){
-    previousTime = millis();
+  void onceSetup(int newRunTime){
+    previousTime = millis(); // Timer is running
     endTime = previousTime + newRunTime;
-	  timerStatus = true;
-    modeLabel = newModeLabel;   
-  } // End of onceSetup()
+    } // End onceSetup()
 
   int onceUpdate(){
-    String localString;
+    int localStatus; // Used in return statements
+    String localString; // Used in print statements
     currentTime = millis();
-    if ((currentTime <= endTime) && (timerStatus == true)) {
-      Serial.printf("In on-time (onceUpdate) \n");
-      delay(5);
-      return statusOn;
-	  } // End if
+    if (currentTime < endTime) {
+      localStatus =  statusOnceOn; // Still in On-time
+      localString = ("Still in on-time for " + timerLabel);
+      Serial.println(localString);
+    } // End if
     else {
-      timerStatus = false;
+      localStatus =  statusOnceOff; // On-time is over
       localString = ("Reached end time for " + timerLabel);
       Serial.println(localString);
-  	  return statusOff;
-    } // End Else
+  	} // End Else
+    return localStatus;
   } // End of onceUpdate()
 
 }; //End of LedTimer Class
@@ -128,7 +141,7 @@ class LedTimer {
 
 // Global parameters
 bool firstRun1 = true;
-bool firstRun3 = true;
+bool firstRun3 = false;
 bool runTimer = true;
 int currentStatus;
 int count1 = 0;
@@ -151,8 +164,6 @@ LedTimer ledTimer1("LED 1 Strip");
 LedTimer ledTimer3("LED 3 Strip");
 Adafruit_NeoPixel ledStrip1(numLeds1, ledPin1, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel ledStrip3(numLeds3, ledPin3, NEO_GRB + NEO_KHZ800);
-//CRGB ledStrip1[numLeds1];
-//CRGB ledStrip3[numLeds3];
 
 /////////////////////////////////////////////////////////////////
 
@@ -172,46 +183,36 @@ void setup() {
 }
 
 void loop() {
-/**	if (firstRun1 == true) {
-    Serial.println("Start");
-    ledStrip1.fill(ledStrip1.Color(50, 25, 5),count1,numLeds1/2); //RGB
-    ledStrip1.show(); 
-    ledTimer1.onceSetup(3000, "Strip 1");
-    firstRun1 = false;
-	} // End First Run
-	currentStatus = ledTimer1.onceUpdate();
-  if (currentStatus == statusOn) {
-    Serial.println("Current Status True");
-  }
-  else if (currentStatus == statusOff) {
-    Serial.println("Current Status False");
-    ledStrip1.fill(ledStrip1.Color(0, 0, 0),0,numLeds1); //RGB
-    //ledStrip1.clear(); // Set all pixel colors to 'off'  
-    ledStrip1.show();
-    count1 = count1 +1;
-    firstRun1 = true;
-  }
-**/  
-  delay(100);
+
+// Repeat mode
     if (firstRun1 == true) {
-    Serial.println("Start");
-    ledStrip1.fill(ledStrip1.Color(0, 100, 0),count1,numLeds1/2); //RGB
-    ledStrip1.show(); 
-    delay(2000);
-    ledTimer1.repeatSetup(1000, 1000, 4500, "Strip 1");
+    Serial.println("Start Repeat Mode");
+    //ledStrip1.fill(ledStrip1.Color(0, 100, 0),count1,numLeds1/2); //RGB
+    // Start color 
+    //ledStrip1.show(); 
+    delay(2000); // wait a moment before timer starts
+    ledTimer1.repeatSetup(350, 350, 6500);
     // (On-Time, Off-Time, End-Time, Label)
+    //ledStrip1.fill(ledStrip1.Color(50, 0, 0),count1,numLeds1/2); //RGB
+    //ledStrip1.show(); 
+    // On-color
+    //delay(500);
     firstRun1 = false;
   } // End First Run is true
   currentStatus = ledTimer1.repeatUpdate();
   if (currentStatus == statusRepeatOn) {
     Serial.println("Current Status: Repeat On");
     ledStrip1.fill(ledStrip1.Color(50, 0, 0),count1,numLeds1/2); //RGB
+    // On color
     ledStrip1.show(); 
+    delay(200);
   }
   else if (currentStatus == statusRepeatOff) {
     Serial.println("Current Status: Repeat Off");
     ledStrip1.fill(ledStrip1.Color(0, 0, 50),count1,numLeds1/2); //RGB
-    ledStrip1.show(); 
+    // Off color
+    ledStrip1.show();
+    delay(200);
   }
   else if (currentStatus == statusOff) {
     Serial.println("Current Status: Off; End time reached");
@@ -220,7 +221,34 @@ void loop() {
     //count1 = count1 +1;
     firstRun1 = true;
     delay(2000);
+    firstRun3 = true;
+    ledStrip1.clear();
   }
+
+//////////////////////////////////////////////////////////
+
+// One-time mode
+    if (firstRun3 == true) {
+    Serial.println("Start one-time");
+    ledStrip1.fill(ledStrip1.Color(50, 25, 5),count1,numLeds1/2); //RGB
+    ledStrip1.show(); 
+    ledTimer3.onceSetup(5000);
+    firstRun3 = false;
+  } // End First Run
+  currentStatus = ledTimer3.onceUpdate();
+  if (currentStatus == statusOnceOn) {
+    Serial.println("Current Status: On");
+  }
+  else if (currentStatus == statusOnceOff) {
+    Serial.println("Current Status: Off");
+    ledStrip1.fill(ledStrip1.Color(0, 0, 0),0,numLeds1); //RGB
+    //ledStrip1.clear(); // Set all pixel colors to 'off'  
+    ledStrip1.show();
+    //count1 = count1 +1;
+    firstRun3 = true;
+    delay(3000);
+  }
+  
 }
 
 /**
@@ -235,7 +263,7 @@ void loop() {
     stripStatus = true;
   } // End Setup
   
-  void stripRunOnce(int newMode, int brightness, CRGB newColor) {
+  void stripRunOnce(int brightness, CRGB newColor) {
     if (newMode == 4){ // Run once
       if (firstRun == true){
         onceSetup(15000, "Mode-4");
