@@ -5,10 +5,10 @@
 /////////////////////////////////////////////////////////////////
 // Data Constants
 #define colorOrder GRB     // make the order RGB
-#define numLeds1 8         //30 LEDs on the strip
-#define numLeds2 8         //30 LEDs on the strip
-#define numLeds3 8         //30 LEDs on the strip
-#define numLeds4 8`         //30 LEDs on the strip
+#define numLeds1 30         //30 LEDs on the strip
+#define numLeds2 30         //30 LEDs on the strip
+#define numLeds3 30         //30 LEDs on the strip
+#define numLeds4 30`        //30 LEDs on the strip
 #define bright1 45          //brightness level 1
 #define bright2 55          //brightness level 2
 #define bright3 65          //brightness level 3
@@ -138,7 +138,26 @@ class LedTimer {
 }; //End of LedTimer Class
 
 /////////////////////////////////////////////////////////////////
-
+// Rainbow cycle along whole strip. Pass delay time (in ms) between frames.
+void rainbow(int wait) {
+  // Hue of first pixel runs 5 complete loops through the color wheel.
+  // Color wheel has a range of 65536 but it's OK if we roll over, so
+  // just count from 0 to 5*65536. Adding 256 to firstPixelHue each time
+  // means we'll make 5*65536/256 = 1280 passes through this loop:
+  for(long firstPixelHue = 0; firstPixelHue < 5*65536; firstPixelHue += 256) {
+    // strip.rainbow() can take a single argument (first pixel hue) or
+    // optionally a few extras: number of rainbow repetitions (default 1),
+    // saturation and value (brightness) (both 0-255, similar to the
+    // ColorHSV() function, default 255), and a true/false flag for whether
+    // to apply gamma correction to provide 'truer' colors (default true).
+    strip.rainbow(firstPixelHue);
+    // Above line is equivalent to:
+    // strip.rainbow(firstPixelHue, 1, 255, 255, true);
+    strip.show(); // Update strip with new contents
+    delay(wait);  // Pause for a moment
+  }
+}
+/////////////////////////////////////////////////////////////////
 // Global parameters
 bool firstRun1 = true;
 bool firstRun3 = true;
@@ -168,19 +187,21 @@ Adafruit_NeoPixel ledStrip1(numLeds1, ledPin1, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel ledStrip3(numLeds3, ledPin3, NEO_GRB + NEO_KHZ800);
 
 /////////////////////////////////////////////////////////////////
-
+int n = 50;
 void setup() {
     Serial.begin(115200);
     delay(3000);
     ledStrip1.begin(); // INITIALIZE NeoPixel strip object
     //ledStrip1.fill(ledStrip1.Color(0, 0, 0),0,30); //RGB
-    //ledStrip1.show(); // Set all pixel colors to 'off'
-    ledStrip1.clear();
+    LedStrip1.show(); // Set all pixel colors to 'off'
+    LedStrip1.setBrightness(45); // Set BRIGHTNESS to about 1/5 (max = 255)
     ledStrip3.begin(); // INITIALIZE NeoPixel strip object
     //ledStrip3.fill(ledStrip1.Color(0, 0, 0),0,30); //RGB
-    //ledStrip3.show(); // Set all pixel colors to 'off'
-    ledStrip3.clear();
+    ledStrip3.show(); // Set all pixel colors to 'off'
+    LedStrip3.setBrightness(45); // Set BRIGHTNESS to about 1/5 (max = 255)
+    
     uint32_t magenta = ledStrip1.Color(255, 0, 255);
+}
 }
 
 void loop() {
@@ -188,13 +209,13 @@ void loop() {
 // Repeat mode
     if (firstRun3 == true) {
     Serial.println("Start Repeat Mode");
-    ledStrip3.fill(ledStrip3.Color(20, 35, 0),count3,numLeds3); //RGB
+    ledStrip3.fill(ledStrip3.Color(35, 0, 15),0,30); //RGB
     // Start color 
     ledStrip3.show(); 
     delay(2000); // wait a moment before timer starts
     ledTimer3.repeatSetup(350, 350, 6500);
     // (On-Time, Off-Time, End-Time, Label)
-    ledStrip3.fill(ledStrip3.Color(50, 0, 0),count3,numLeds3); //RGB
+    ledStrip3.fill(ledStrip3.Color(50, 0, 0),0,30); //RGB
     // On-color
     ledStrip3.show(); 
     delay(50);
@@ -203,21 +224,21 @@ void loop() {
   currentStatus = ledTimer3.repeatUpdate();
   if (currentStatus == statusRepeatOn) {
     Serial.println("Current Status in loop(): Repeat On");
-    ledStrip3.fill(ledStrip3.Color(50, 0, 0),count3,numLeds3); //RGB
+    ledStrip3.fill(ledStrip3.Color(50, 0, 0),0,30); //RGB
     // On color
     ledStrip3.show(); 
     delay(200);
   }
   else if (currentStatus == statusRepeatOff) {
     Serial.println("Current Status in loop(): Repeat Off");
-    ledStrip3.fill(ledStrip3.Color(0, 0, 50),count3,numLeds3); //RGB
+    ledStrip3.fill(ledStrip3.Color(0, 0, 50),0,30); //RGB
     // Off color
     ledStrip3.show();
     delay(200);
   }
   else if (currentStatus == statusOff) {
     Serial.println("Current Status in loop(): Off; End time reached");
-    ledStrip3.fill(ledStrip3.Color(0, 0, 0),0,numLeds3); //RGB
+    ledStrip3.fill(ledStrip3.Color(0, 0, 0),0,30); //RGB
     ledStrip3.show();
     //count3 = count3 +1;
     firstRun3 = true;
@@ -233,9 +254,9 @@ void loop() {
 // One-time mode
     if (firstRun1 == true) {
     Serial.println("Start one-time");
-    ledStrip1.fill(ledStrip1.Color(50, 25, 5),count1,numLeds1); //RGB
+    ledStrip1.fill(ledStrip1.Color(n, 25, 5),count1,numLeds1); //RGB
     ledStrip1.show(); 
-    ledTimer1.onceSetup(5000);
+    ledTimer1.onceSetup(4678);
     firstRun1 = false;
   } // End First Run
   currentStatus = ledTimer1.onceUpdate();
@@ -247,9 +268,8 @@ void loop() {
     ledStrip1.fill(ledStrip1.Color(0, 0, 0),0,numLeds1); //RGB
     //ledStrip1.clear(); // Set all pixel colors to 'off'  
     ledStrip1.show();
-    count1 = count1 +1;
+    n = n + 5;
     firstRun1 = true;
     delay(30);
   }
-
 }
