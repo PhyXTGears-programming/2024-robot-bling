@@ -12,14 +12,26 @@
 #define ledPin2 17          // Led Strip 2 ouput pin
 #define ledPin3 18          // Led Strip 3 ouput pin
 #define ledPin4 19          // Led Strip 4 ouput pin
+
 #define statusOff 10        // Used by stripStatus
 #define statusOn 11         // Used by stripStatus
+
 #define statusRepeatOn 12   // Used by stripStatus
 #define statusRepeatOff 13  // Used by stripStatus
+
 #define statusOnceOn 14     // Used by stripStatus
 #define statusOnceOff 15    // Used by stripStatus
+
 #define repeatOnTime 21
 #define repeatOffTime 22
+
+#define picoRed ledStrip1.Color(255, 0, 0)
+#define picoOrange ledStrip1.Color(255, 69, 0)
+#define picoYellow ledStrip1.Color(255, 165, 0)
+#define picoGreen ledStrip1.Color(0, 255, 0)
+#define picoBlue ledStrip1.Color(0, 0, 255)
+#define picoPurple ledStrip1.Color(147, 29, 147)
+#define picoBlack ledStrip1.Color(0, 0, 0)
 
 // Needed here before Class ledEffects
 Adafruit_NeoPixel ledStrip1(numLeds1, ledPin1, NEO_GRB + NEO_KHZ800); 
@@ -137,19 +149,38 @@ class LedTimer {
 
 /////////////////////////////////////////////////////////////////
 // Global parameters
-bool firstRun1 = false;
-bool firstRun2 = false;
-bool firstRun3 = false;
-bool firstRun4 = false;
-int count1 = 0;
-int count2 = 0;
-int count3 = 0;
-int count4 = 0;
-int count11 = 0;
+bool firstRun1 = true;
+bool firstRun2 = true;
+bool firstRun3 = true;
+bool firstRun4 = true;
+
+bool m0Status = false;
+bool m1Status = false;
+bool m2Status = false;
+bool m3Status = false;
+bool m4Status = false;
+bool m11Status = false;
+bool m12Status = false;
+
 int stripStatus1 = statusOff;
 int stripStatus2 = statusOff;
 int stripStatus3 = statusOff;
 int stripStatus4 = statusOff;
+
+int timeOut1 = 3500;
+int timeOut2 = timeOut1;
+int timeOut3 = timeOut1;
+int timeOut4 = timeOut1;
+
+int onTime1 = 350;
+int onTime2 = onTime1;
+int onTime3 = onTime1;
+int onTime4 = onTime1;
+
+int offTime1 = onTime1;
+int offTime2 = offTime1;
+int offTime3 = offTime1;
+int offTime4 = offTime1;
 
 /////////////////////////////////////////////////////////////////
 LedTimer ledTimer1("Timer1");
@@ -171,60 +202,24 @@ void setup() {
     ledStrip3.show();
     ledStrip3.setBrightness(65);
 
-    firstRun1 = true;
-    firstRun2 = true;
-    firstRun3 = true;
-    firstRun4 = true;
-    //uint32_t magenta = ledStrip1.Color(255, 0, 255);
 } // End setup()
 
-int n = 50;
+//////////////////////////////////////////////////////////////////////
 void loop() {    
-  int localStatus1;
-  int localStatus3;
-
-	// Repeat mode using LED strip 3 and Timer 3
-  // Repeat Mode Status:
-  // statusRepeatOn - current time is < onTime; still in on-time
-  // statusRepeatOff - current time is < offTime; still in off-time
-  // statusOff - currrent time is > endTime; repeat mode is complete
-  if (firstRun3 == true) { // Start of the repeat cycle
-      Serial.println("In loop() - Start Repeat Mode");
-      // xxx.fill(color, first, count);
-      ledStrip3.fill(ledStrip3.Color(15, 85, 15),1,30); //RGB
-      // Start color 
-      ledStrip3.show(); 
-      delay(1000); // wait a moment before timer starts
-      ledTimer3.repeatSetup(300, 300, 3700);
-      delay(100);                                                              
-      firstRun3 = false; // Run once per repeat cycle
-    } // End First Run is true
-  localStatus3 = ledTimer3.repeatUpdate(); // Checking on timer status
-  if (localStatus3 == statusRepeatOn) {
-      Serial.println("Current Status in loop(): Repeat On");
-      ledStrip3.fill(ledStrip3.Color(50, 0, 0),1,30); //RGB
-      // On color red
-      ledStrip3.show(); 
-      delay(100);
-  } // End if statusRepeatOn
-  else if (localStatus3 == statusRepeatOff) {
-    Serial.println("Current Status in loop(): Repeat Off");
-    ledStrip3.fill(ledStrip3.Color(0, 0, 50),1,30); //RGB
-    // Off color blue
-    ledStrip3.show();
-    delay(100);
-  } // End else if statusRepeatOff
-  else if (localStatus3 == statusOff) {
-    firstRun3 = true; // Ready of next repeat cycle
-    Serial.println("Current Status in loop(): Off; End time reached");
-    ledStrip3.fill(ledStrip3.Color(0, 0, 0),0,30); //RGB
-    ledStrip3.show();
-    delay(1000);
-    }// End else if statusOff
-
+  m0();
+  m1();
+  m2();
+  m3();
+  m4();
+  m11();
+  m12();
+  //oneTimeLed(1, picoPurple, picoYellow, timeOut1);
+  //repeatLed(1, picoRed, picoGreen, picoBlue, onTime1, offTime1, timeOut1);
 } // End loop()
+///////////////////////////////////////////////////////////////////////////////
 
-void oneTimeLedSetup(int newLedStrip, uint32_t newOnColor, int newTimeOut) {
+int oneTimeLed(int newLedStrip, uint32_t newOnColor, uint32_t newOffColor, int newTimeOut){
+  int localStatus;
   if (newLedStrip == 1) {
     if (firstRun1 == true) {
     // One-time Status:
@@ -236,55 +231,112 @@ void oneTimeLedSetup(int newLedStrip, uint32_t newOnColor, int newTimeOut) {
     ledTimer1.onceSetup(newTimeOut);
     firstRun1 = false;
   } // End FirstRun1 
-  } // End ledStrip1
-
-} // End oneTimeLedSetup()
-
-int oneTimeLedUpdate(int newLedStrip, uint32_t localBlack){
-  int localStatus;
-  if (newLedStrip == 1) {
   localStatus = ledTimer1.onceUpdate();
   if (localStatus == statusOnceOn) {
     Serial.println("One-Time Mode is ON for ledStrip1");
     delay(100);
   } // End if statusOnceOn
   else if (localStatus == statusOnceOff) {
-    Serial.println("One-Time is ON for ledStrip1");
-    ledStrip1.fill(localBlack,0,numLeds1); // Off-Color
+    Serial.println("One-Time is OFF for ledStrip1");
+    ledStrip1.fill(newOffColor,0,numLeds1); // Off-Color
     ledStrip1.show();
-    firstRun1 = true;
   } // end else if statusOnceOff
-  } // End ledStrip1
-  return 0;
-} // End oneTimeLedUpdate()
+  } // End Led Strip is 1
 
+////////////////////////////////////////////////////////////////////
+  else if (newLedStrip == 2) {
+    if (firstRun2 == true) {
+    // One-time Status:
+    // statusOnceOn - Still in On-time
+    // statusOnceOff - On-time is over
+    Serial.println("Starting One-Time mode for ledStip2");
+    ledStrip2.fill(newOnColor,0,numLeds2); // On-Color
+    ledStrip2.show(); 
+    ledTimer2.onceSetup(newTimeOut);
+    firstRun2 = false;
+  } // End FirstRun2 
+  localStatus = ledTimer2.onceUpdate();
+  if (localStatus == statusOnceOn) {
+    Serial.println("One-Time Mode is ON for ledStrip2");
+    delay(100);
+  } // End if statusOnceOn
+  else if (localStatus == statusOnceOff) {
+    Serial.println("One-Time is OFF for ledStrip2");
+    ledStrip2.fill(newOffColor,0,numLeds2); // Off-Color
+    ledStrip2.show();
+  } // end else if statusOnceOff
+  } // End Led Strip is 2
 
-void repeatLedSetup(int newLedStrip, uint32_t newOffColor, int newOnTime, int newOffTime, int newRunTime) {
+////////////////////////////////////////////////////////////////////
+  else if (newLedStrip == 3) {
+    if (firstRun3 == true) {
+    // One-time Status:
+    // statusOnceOn - Still in On-time
+    // statusOnceOff - On-time is over
+    Serial.println("Starting One-Time mode for ledStip3");
+    ledStrip3.fill(newOnColor,0,numLeds3); // On-Color
+    ledStrip3.show(); 
+    ledTimer3.onceSetup(newTimeOut);
+    firstRun3 = false;
+  } // End FirstRun3 
+  localStatus = ledTimer3.onceUpdate();
+  if (localStatus == statusOnceOn) {
+    Serial.println("One-Time Mode is ON for ledStrip3");
+    delay(100);
+  } // End if statusOnceOn
+  else if (localStatus == statusOnceOff) {
+    Serial.println("One-Time is OFF for ledStrip3");
+    ledStrip3.fill(newOffColor,0,numLeds3); // Off-Color
+    ledStrip3.show();
+  } // end else if statusOnceOff
+  } // End Led Strip is 3
+
+////////////////////////////////////////////////////////////////////
+  else if (newLedStrip == 4) {
+     if (firstRun4 == true) {
+    // One-time Status:
+    // statusOnceOn - Still in On-time
+    // statusOnceOff - On-time is over
+    Serial.println("Starting One-Time mode for ledStip4");
+    ledStrip4.fill(newOnColor,0,numLeds4); // On-Color
+    ledStrip4.show(); 
+    ledTimer4.onceSetup(newTimeOut);
+    firstRun4 = false;
+  } // End FirstRun4 
+  localStatus = ledTimer4.onceUpdate();
+  if (localStatus == statusOnceOn) {
+    Serial.println("One-Time Mode is ON for ledStrip4");
+    delay(100);
+  } // End if statusOnceOn
+  else if (localStatus == statusOnceOff) {
+    Serial.println("One-Time is OFF for ledStrip4");
+    ledStrip4.fill(newOffColor,0,numLeds4); // Off-Color
+    ledStrip4.show();
+  } // end else if statusOnceOff
+  } // End Led Strip is 4  
+  return localStatus;
+} // End oneTimeLed()
+
+////////////////////////////////////////////////////////////////////
+
+int repeatLed(int newLedStrip, uint32_t newOnColor, uint32_t newOffColor, uint32_t localBlack, int newOnTime, int newOffTime, int newRunTime) {
+  int localStatus;
   if (newLedStrip == 1) {
     if (firstRun1 == true) { // Start of the repeat cycle
     // Repeat Mode Status:
     // statusRepeatOn - current time is < onTime; still in on-time
     // statusRepeatOff - current time is < offTime; still in off-time
     // statusOff - currrent time is > endTime; repeat mode is complete
-      Serial.println("Starting Repeat mode for ledStip1");
-      // xxx.fill(color, first, count);
-      ledStrip1.fill(newOffColor,0,numLeds1); // Off-Color
-      ledStrip1.show(); 
+    Serial.println("Starting Repeat mode for ledStip1");
       delay(100); // wait a moment before timer starts
       ledTimer1.repeatSetup(newOnTime, newOffTime, newRunTime);
-      delay(100);                                                              
+      //delay(100);                                                              
       firstRun1 = false; // Run once per repeat cycle    
     } // End FirstRun1 
-  } // End ledStrip1
-
-} // End repeatLedSetup()
-
-int repeatLedUpdate(int newLedStrip, uint32_t newOnColor, uint32_t newOffColor, uint32_t localBlack) {
-  int localStatus;
-  if (newLedStrip == 1) {
   localStatus = ledTimer1.repeatUpdate(); // Checking on timer status
   if (localStatus == statusRepeatOn) {
       Serial.println("Current Status in loop(): Repeat On");
+      // xxx.fill(color, first, count);
       ledStrip1.fill(newOnColor,0,numLeds1); // On-Color
       ledStrip1.show(); 
       delay(100);
@@ -296,12 +348,218 @@ int repeatLedUpdate(int newLedStrip, uint32_t newOnColor, uint32_t newOffColor, 
     delay(100);
   } // End else if statusRepeatOff
   else if (localStatus == statusOff) {
-    firstRun1 = true; // Ready of next repeat cycle
+    //firstRun1 = true; // Ready of next repeat cycle
     Serial.println("Current Status in loop(): Off; End time reached");
     ledStrip1.fill(localBlack,0,numLeds1);
     ledStrip1.show();
     delay(100);
     }// End else if statusOff
   } // End ledStrip1
-  return 0;    
+////////////////////////////////////////////////////////////////////
+  if (newLedStrip == 2) {
+    if (firstRun2 == true) { // Start of the repeat cycle
+    // Repeat Mode Status:
+    // statusRepeatOn - current time is < onTime; still in on-time
+    // statusRepeatOff - current time is < offTime; still in off-time
+    // statusOff - currrent time is > endTime; repeat mode is complete
+      Serial.println("Starting Repeat mode for ledStip2");
+      // xxx.fill(color, first, count);
+      ledStrip2.fill(newOffColor,0,numLeds2); // Off-Color
+      ledStrip2.show(); 
+      delay(100); // wait a moment before timer starts
+      ledTimer2.repeatSetup(newOnTime, newOffTime, newRunTime);
+      delay(100);                                                              
+      firstRun2 = false; // Run once per repeat cycle    
+    } // End FirstRun2 
+  localStatus = ledTimer2.repeatUpdate(); // Checking on timer status
+  if (localStatus == statusRepeatOn) {
+      Serial.println("Current Status in loop(): Repeat On");
+      ledStrip2.fill(newOnColor,0,numLeds2); // On-Color
+      ledStrip2.show(); 
+      delay(100);
+  } // End if statusRepeatOn
+  else if (localStatus == statusRepeatOff) {
+    Serial.println("Current Status in loop(): Repeat Off");
+    ledStrip2.fill(newOffColor,0,numLeds2); // Off-Color
+    ledStrip2.show();
+    delay(100);
+  } // End else if statusRepeatOff
+  else if (localStatus == statusOff) {
+    //firstRun2 = true; // Ready of next repeat cycle
+    Serial.println("Current Status in loop(): Off; End time reached");
+    ledStrip2.fill(localBlack,0,numLeds2);
+    ledStrip2.show();
+    delay(100);
+    }// End else if statusOff
+  } // End ledStrip2
+
+////////////////////////////////////////////////////////////////////
+  if (newLedStrip == 3) {
+    if (firstRun3 == true) { // Start of the repeat cycle
+    // Repeat Mode Status:
+    // statusRepeatOn - current time is < onTime; still in on-time
+    // statusRepeatOff - current time is < offTime; still in off-time
+    // statusOff - currrent time is > endTime; repeat mode is complete
+      Serial.println("Starting Repeat mode for ledStip3");
+      // xxx.fill(color, first, count);
+      ledStrip3.fill(newOffColor,0,numLeds3); // Off-Color
+      ledStrip3.show(); 
+      delay(100); // wait a moment before timer starts
+      ledTimer3.repeatSetup(newOnTime, newOffTime, newRunTime);
+      delay(100);                                                              
+      firstRun3 = false; // Run once per repeat cycle    
+    } // End FirstRun3 
+  localStatus = ledTimer3.repeatUpdate(); // Checking on timer status
+  if (localStatus == statusRepeatOn) {
+      Serial.println("Current Status in loop(): Repeat On");
+      ledStrip3.fill(newOnColor,0,numLeds3); // On-Color
+      ledStrip3.show(); 
+      delay(100);
+  } // End if statusRepeatOn
+  else if (localStatus == statusRepeatOff) {
+    Serial.println("Current Status in loop(): Repeat Off");
+    ledStrip3.fill(newOffColor,0,numLeds3); // Off-Color
+    ledStrip3.show();
+    delay(100);
+  } // End else if statusRepeatOff
+  else if (localStatus == statusOff) {
+    //firstRun3 = true; // Ready of next repeat cycle
+    Serial.println("Current Status in loop(): Off; End time reached");
+    ledStrip3.fill(localBlack,0,numLeds3);
+    ledStrip3.show();
+    delay(100);
+    }// End else if statusOff
+  } // End ledStrip3
+
+////////////////////////////////////////////////////////////////////
+  if (newLedStrip == 4) {
+    if (firstRun4 == true) { // Start of the repeat cycle
+    // Repeat Mode Status:
+    // statusRepeatOn - current time is < onTime; still in on-time
+    // statusRepeatOff - current time is < offTime; still in off-time
+    // statusOff - currrent time is > endTime; repeat mode is complete
+      Serial.println("Starting Repeat mode for ledStip4");
+      // xxx.fill(color, first, count);
+      ledStrip4.fill(newOffColor,0,numLeds4); // Off-Color
+      ledStrip4.show(); 
+      delay(100); // wait a moment before timer starts
+      ledTimer4.repeatSetup(newOnTime, newOffTime, newRunTime);
+      delay(100);                                                              
+      firstRun4 = false; // Run once per repeat cycle    
+    } // End FirstRun4 
+  localStatus = ledTimer4.repeatUpdate(); // Checking on timer status
+  if (localStatus == statusRepeatOn) {
+      Serial.println("Current Status in loop(): Repeat On");
+      ledStrip4.fill(newOnColor,0,numLeds4); // On-Color
+      ledStrip4.show(); 
+      delay(100);
+  } // End if statusRepeatOn
+  else if (localStatus == statusRepeatOff) {
+    Serial.println("Current Status in loop(): Repeat Off");
+    ledStrip4.fill(newOffColor,0,numLeds4); // Off-Color
+    ledStrip4.show();
+    delay(100);
+  } // End else if statusRepeatOff
+  else if (localStatus == statusOff) {
+    //firstRun4 = true; // Ready of next repeat cycle
+    Serial.println("Current Status in loop(): Off; End time reached");
+    ledStrip4.fill(localBlack,0,numLeds4);
+    ledStrip4.show();
+    delay(100);
+    }// End else if statusOff
+  } // End ledStrip4
+  return localStatus;    
 } // End repeatLedUpdate()
+
+void m0(){
+  if (m0Status == true){
+    oneTimeLed(1, picoBlack, picoBlack, timeOut1);
+    oneTimeLed(2, picoBlack, picoBlack, timeOut2);
+    oneTimeLed(3, picoBlack, picoBlack, timeOut3);
+    oneTimeLed(4, picoBlack, picoBlack, timeOut4);
+  } // End m0Status
+} // End m0()
+
+void m1(){
+  if (m1Status == true){
+    int localStatus = 0;
+    oneTimeLed(1, picoRed, picoBlack, timeOut1);
+    oneTimeLed(2, picoRed, picoBlack, timeOut2);
+    oneTimeLed(3, picoRed, picoBlack, timeOut3);
+    localStatus = oneTimeLed(4, picoRed, picoBlack, timeOut4);
+    if (localStatus == statusOnceOff) {
+      Serial.println("statusOnceOff");
+      m1Status = false;  
+    } // End if statusOnceOff
+  } // End m1Status
+} // End m1()
+
+void m2(){
+  if (m2Status == true){
+    int localStatus = 0;
+    oneTimeLed(1, picoYellow, picoBlack, timeOut1);
+    oneTimeLed(2, picoYellow, picoBlack, timeOut2);
+    oneTimeLed(3, picoYellow, picoBlack, timeOut3);
+    localStatus = oneTimeLed(4, picoYellow, picoBlack, timeOut4);
+    if (localStatus == statusOnceOff) {
+      Serial.println("statusOnceOff");
+      m2Status = false;  
+    } // End if statusOnceOff
+  } // End m2Status
+} // End m2()
+
+void m3(){
+  if (m3Status == true){
+    int localStatus = 0;
+    oneTimeLed(1, picoGreen, picoBlack, timeOut1);
+    oneTimeLed(2, picoGreen, picoBlack, timeOut2);
+    oneTimeLed(3, picoGreen, picoBlack, timeOut3);
+    localStatus = oneTimeLed(4, picoGreen, picoBlack, timeOut4);
+    if (localStatus == statusOnceOff) {
+      Serial.println("statusOff");
+      m3Status = false;  
+    } // End if statusOnceOff    
+  } // End m3Status
+} // End m3()
+
+void m4(){
+  if (m4Status == true){
+    int localStatus = 0;
+    oneTimeLed(1, picoBlue, picoBlack, timeOut1);
+    oneTimeLed(2, picoBlue, picoBlack, timeOut2);
+    oneTimeLed(3, picoBlue, picoBlack, timeOut3);
+    localStatus = oneTimeLed(4, picoBlue, picoBlack, timeOut4);
+    if (localStatus == statusOnceOff) {
+      Serial.println("statusOff");
+      m4Status = false;  
+    } // End if statusOnceOff   
+  } // End m4Status
+} // End m4()
+
+void m11(){
+  if (m11Status == true){
+  int localStatus = 0;
+  repeatLed(1, picoBlue, picoBlack, picoBlack, onTime1, offTime1, timeOut1);
+  repeatLed(2, picoBlue, picoBlack, picoBlack, onTime2, offTime2, timeOut2);
+  repeatLed(3, picoBlue, picoBlack, picoBlack, onTime3, offTime3, timeOut3);
+  localStatus = repeatLed(4, picoBlue, picoBlack, picoBlack, onTime4, offTime4, timeOut4);
+  if (localStatus == statusOff) {
+    Serial.println("statusOff");
+    m11Status = false;  
+    } // End if statusOnceOff   
+  } // End m11Status
+} // End m11()
+
+void m12(){
+  if (m12Status == true){
+  int localStatus = 0;
+  repeatLed(1, picoRed, picoGreen, picoBlack, onTime1, offTime1, timeOut1);
+  repeatLed(2, picoRed, picoGreen, picoBlack, onTime2, offTime2, timeOut2);
+  repeatLed(3, picoRed, picoGreen, picoBlack, onTime3, offTime3, timeOut3);
+  localStatus = repeatLed(4, picoRed, picoGreen, picoBlack, onTime4, offTime4, timeOut4);
+  if (localStatus == statusOff) {
+    Serial.println("statusOff");
+    m12Status = false;  
+    } // End if statusOnceOff   
+  } // End m12Status
+} // End m12()
