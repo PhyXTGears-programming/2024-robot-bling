@@ -2,6 +2,8 @@
 
 #include "RingBuffer.h"
 
+String buffValue;
+
 CassiusRingBuffer buff;
 
 void setup() {
@@ -37,7 +39,8 @@ void loop() {
     }
     
 
-}
+
+}//end of loop()
 // Called when the I2C responder gets written to
 void recv(int len) {
     int i;
@@ -46,9 +49,12 @@ void recv(int len) {
     //buff.put(/*the byte we got over I2C*/);
     char_in =  true;
 }
-//   /\     /\
+
+
+
+//   /\     /\ 
 //   \/-----\/
 //    \ʘ   ʘ/
-//     \ © /
-//      \_/
+//    ≈\ © /≈
+//      \‿/
 //  "mouse" - 2/24/2024

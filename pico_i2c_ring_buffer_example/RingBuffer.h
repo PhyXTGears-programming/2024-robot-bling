@@ -1,5 +1,5 @@
 #pragma once
-
+#include <Wire.h>
 #include <cmath>
 
 //template <class uint8_t>

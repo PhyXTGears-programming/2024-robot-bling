@@ -101,7 +101,7 @@ class LedTimer {
     } // End check off-time
     // Check if End-time is reached
     currentTime = millis();
-    if ((currentTime > endTime)){ // Reached end time for repeat mode
+    if (currentTime > endTime){ // Reached end time for repeat mode
         localString = ("repeatUpdate: Reached end time for " + timerLabel);
         Serial.println(localString);
         localString = ("");
