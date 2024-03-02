@@ -1,6 +1,7 @@
 #include <Wire.h>
 
 #include "RingBuffer.h"
+#include <string>
 
 String buffValue;
 
@@ -33,9 +34,20 @@ void loop() {
      }
      
       Serial.print("\r\n");
-      
+/**
+      int n = sizeof(buff);
+      char chars[n+1];
+      memcpy(chars, buff.get(), n);
+      chars[n] = '\0';
+      Serial.println("chars: ",chars);
+**/
+/**
+      int n = sizeof(buff);
+      std::string localString(buff.get(), n);
+      Serial.printf("localString: '%s'\r\n",localString);
       //Serial.println (buff.get());
       char_in =  false;
+**/
     }
     
 
