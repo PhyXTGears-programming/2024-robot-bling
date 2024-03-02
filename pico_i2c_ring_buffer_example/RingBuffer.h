@@ -29,7 +29,7 @@ class CassiusRingBuffer {
         m_head = (m_head + 1) % max_size;
         m_full = (m_head == m_tail);
     }//end of put()
-/**
+
     void put(char const * const str) {
       size_t len = strlen(str);
 
@@ -37,7 +37,7 @@ class CassiusRingBuffer {
         put(str[a]);
       } // end of for loop
     } // end of put() (duplicate)
-**/      
+      
     uint8_t get(){
         if (m_head == m_tail && ! m_full){
             return 0;

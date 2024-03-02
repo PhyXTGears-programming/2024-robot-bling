@@ -4,31 +4,36 @@
 
 /////////////////////////////////////////////////////////////////
 // Data Constants
-#define numLeds1 30         //30 LEDs on the strip
-#define numLeds2 30         //30 LEDs on the strip
-#define numLeds3 30        //30 LEDs on the strip
-#define numLeds4 30         //30 LEDs on the strip
-#define ledPin1 16         // Led Strip 1 ouput pin
-#define ledPin2           // Led Strip 2 ouput pin
-#define ledPin3 18         // Led Strip 3 ouput pin
-#define ledPin4 19          // Led Strip 4 ouput pin
-#define statusOff 10        // Used by stripStatus
-#define statusOn 11         // Used by stripStatus
-#define statusRepeatOn 12   // Used by stripStatus
-#define statusRepeatOff 13  // Used by stripStatus
-#define statusOnceOn 14     // Used by stripStatus
-#define statusOnceOff 15    // Used by stripStatus
-#define repeatOnTime 21
-#define repeatOffTime 22
+#define numLedsClimber1 20    // Climber #1
+#define numLedsClimber2 20    // Climber #2
+#define numLedsTrap 36        // Trap
+#define numLedsSpeaker 40     // Speaker
+
+#define ledPinClimber1 16     // Climber #1 ouput pin
+#define ledPinClimber2 17     // Climber #2 ouput pin
+#define ledPinTrap 18         // Trap ouput pin
+#define ledPinSpeaker 19      // Speaker ouput pin
+
+// Used by stripStatus
+#define statusOff 10        // Unit is off
+#define statusOn 11         // Unit is on
+#define statusRepeatOn 12   // Repeat mode is on
+#define statusRepeatOff 13  // Repeat mode is off
+#define statusOnceOn 14     // One-time mode is on
+#define statusOnceOff 15    // One-time mode is off
+#define repeatOnTime 21     // Repeat mode is in on-phase
+#define repeatOffTime 22    // Repeat mode is in off-phase
 
 bool DEBUG = false;
 // Needed here before Class ledEffects
-Adafruit_NeoPixel ledStrip1(numLeds1, ledPin1, NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel ledStrip3(numLeds3, ledPin3, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel ledStripClimber1(numLedsClimber1, ledPinClimber1, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel ledStripClimber2(numLedsClimber2, ledPinClimber2, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel ledStripTrap(numLedsTrap, ledPinTrap, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel ledStripSpeaker(numLedsSpeaker, ledPinSpeaker, NEO_GRB + NEO_KHZ800);
 
 /////////////////////////////////////////////////////////////////
 class LedTimer {
-  // Works in two modes: One0time and Repeat.
+  // Works in two modes: One-time and Repeat.
   // Class Member Variables 
   public:
   String timerLabel;  // Name of timer used in print statements
@@ -151,15 +156,15 @@ class LedEffects {
   } // End create LedEffects()
 
   bool colorWipe(uint32_t color, int wait) {
-    if (stripNum == 1){ // For LED Strip 1
-      if (wipeCount1 < ledStrip1.numPixels()){
-        ledStrip1.setPixelColor(wipeCount1, color);// Set one pixel's color
-        ledStrip1.show();                         // Update strip to match
+    if (stripNum == 1){ // For Climber 1 LED strip
+      if (wipeCount1 < ledStripClimber1.numPixels()){
+        ledStripClimber1.setPixelColor(wipeCount1, color);// Set one pixel's color
+        ledStripClimber1.show();                         // Update strip to match
         localStatus = false;                      // Used by return
         wipeCount1 = wipeCount1 + 1;                // Ready for next pixel
         delay(wait);                           //  Pause for a moment   
       } // End if wipeCount1
-      else if (wipeCount1 >= ledStrip1.numPixels()){
+      else if (wipeCount1 >= ledStripClimber1.numPixels()){
         localStatus = true;     // Used by return
         wipeCount1 = 0;          // Ready for next Color Wipe 
       } // end else if wipeCount1
@@ -179,17 +184,17 @@ class LedEffects {
     // saturation and value (brightness) (both 0-255, similar to the
     // ColorHSV() function, default 255), and a true/false flag for whether
     // to apply gamma correction to provide 'truer' colors (default true).
-    if (stripNum == 1){ // For LED Strip 1
-		ledStrip1.rainbow(firstPixelHue);
+    if (stripNum == 1){ // For Climber 1 LED strip
+		ledStripClimber1.rainbow(firstPixelHue);
 		// Above line is equivalent to:
 		// strip.rainbow(firstPixelHue, 1, 255, 255, true);
-		ledStrip1.show(); // Update strip with new contents  
+		ledStripClimber1.show(); // Update strip with new contents  
     } //End if 
-    else if (stripNum == 3){ // For LED Strip 1
-		ledStrip3.rainbow(firstPixelHue);
+    else if (stripNum == 3){ // For Climber 1 LED strip
+		ledStripTrap.rainbow(firstPixelHue);
 		// Above line is equivalent to:
 		// strip.rainbow(firstPixelHue, 1, 255, 255, true);
-		ledStrip3.show(); // Update strip with new contents  
+		ledStripTrap.show(); // Update strip with new contents  
     } //End if 
     delay(wait);  // Pause for a moment
     } // End for loop
@@ -222,21 +227,21 @@ LedEffects mystrip3(3);
 void setup() {
     Serial.begin(115200);
     delay(3000);
-    ledStrip1.begin(); // INITIALIZE NeoPixel strip object
-    ledStrip1.fill(ledStrip1.Color(0, 0, 0),0,30); //RGB
-    ledStrip1.show(); // Set all pixel colors to 'off'
-    ledStrip1.setBrightness(65);
-    ledStrip1.clear();
-    ledStrip1.show();
-    ledStrip3.begin(); // INITIALIZE NeoPixel strip object
-    ledStrip3.fill(ledStrip3.Color(0, 0, 0),0,30); //RGB
-    ledStrip3.show(); // Set all pixel colors to 'off'
-    ledStrip3.setBrightness(65);
-    ledStrip3.clear();
-    ledStrip3.show();
+    ledStripClimber1.begin(); // INITIALIZE NeoPixel strip object
+    ledStripClimber1.fill(ledStripClimber1.Color(0, 0, 0),0,30); //RGB
+    ledStripClimber1.show(); // Set all pixel colors to 'off'
+    ledStripClimber1.setBrightness(65);
+    ledStripClimber1.clear();
+    ledStripClimber1.show();
+    ledStripTrap.begin(); // INITIALIZE NeoPixel strip object
+    ledStripTrap.fill(ledStripTrap.Color(0, 0, 0),0,30); //RGB
+    ledStripTrap.show(); // Set all pixel colors to 'off'
+    ledStripTrap.setBrightness(65);
+    ledStripTrap.clear();
+    ledStripTrap.show();
     firstRun1 = true;
     firstRun3 = true;
-    uint32_t magenta = ledStrip1.Color(255, 0, 255);
+    uint32_t magenta = ledStripClimber1.Color(255, 0, 255);
 }
 int n = 50;
 void loop() {    
@@ -244,7 +249,7 @@ void loop() {
   bool localStatus3;
   int effectsStatus;
 
-	// Repeat mode using LED strip 3 and Timer 3
+	// Repeat mode using Trap LED strip and Timer 3
   // Repeat Mode Status:
   // statusRepeatOn - current time is < onTime; still in on-time
   // statusRepeatOff - current time is < offTime; still in off-time
@@ -252,9 +257,9 @@ void loop() {
   if (firstRun3 == true) { // Start of the repeat cycle
       Serial.println("In loop() - Start Repeat Mode");
       // xxx.fill(color, first, count);
-      ledStrip3.fill(ledStrip3.Color(15, 85, 15),1,30); //RGB
+      ledStripTrap.fill(ledStripTrap.Color(15, 85, 15),1,30); //RGB
       // Start color 
-      ledStrip3.show(); 
+      ledStripTrap.show(); 
       delay(1000); // wait a moment before timer starts
       ledTimer3.repeatSetup(300, 300, 3500);
       delay(50);                                                              
@@ -263,28 +268,28 @@ void loop() {
   localStatus3 = ledTimer3.repeatUpdate(); // Checking on timer status
   if (localStatus3 == statusRepeatOn) {
       Serial.println("Current Status in loop(): Repeat On");
-      ledStrip3.fill(ledStrip3.Color(50, 0, 0),1,30); //RGB
+      ledStripTrap.fill(ledStripTrap.Color(50, 0, 0),1,30); //RGB
       // On color red
-      ledStrip3.show(); 
+      ledStripTrap.show(); 
       delay(20);
   } // End if statusRepeatOn
   else if (localStatus3 == statusRepeatOff) {
     Serial.println("Current Status in loop(): Repeat Off");
-    ledStrip3.fill(ledStrip3.Color(0, 0, 50),1,30); //RGB
+    ledStripTrap.fill(ledStripTrap.Color(0, 0, 50),1,30); //RGB
     // Off color blue
-    ledStrip3.show();
+    ledStripTrap.show();
     delay(20);
   } // End else if statusRepeatOff
   else if (localStatus3 == statusOff) {
     firstRun3 = true; // Ready of next repeat cycle
     Serial.println("Current Status in loop(): Off; End time reached");
-    //ledStrip3.fill(ledStrip3.Color(0, 0, 0),0,30); //RGB
-    //ledStrip3.show();
+    //ledStripTrap.fill(ledStripTrap.Color(0, 0, 0),0,30); //RGB
+    //ledStripTrap.show();
     }// End else if statusOff
 
-  //mystrip3.colorWipe(ledStrip3.Color(255,   0,   0), 0); // Red
-  //mystrip3.colorWipe(ledStrip3.Color(  0, 255,   0), 50); // Green
-  //mystrip3.colorWipe(ledStrip3.Color(  0,   0, 255), 50); // Blue
+  //mystrip3.colorWipe(ledStripTrap.Color(255,   0,   0), 0); // Red
+  //mystrip3.colorWipe(ledStripTrap.Color(  0, 255,   0), 50); // Green
+  //mystrip3.colorWipe(ledStripTrap.Color(  0,   0, 255), 50); // Blue
 
 //////////////////////////////////////////////////////////
 
@@ -294,8 +299,8 @@ void loop() {
     // statusOnceOn - Still in On-time
     // statusOnceOff - On-time is over
     Serial.println("In Loop() - Start one-time");
-    ledStrip1.fill(ledStrip1.Color(n, 25, 5),1,30); //RGB
-    ledStrip1.show(); 
+    ledStripClimber1.fill(ledStripClimber1.Color(n, 25, 5),1,30); //RGB
+    ledStripClimber1.show(); 
     ledTimer1.onceSetup(3500);
     firstRun1 = false;
   } // End First Run1 
@@ -305,9 +310,9 @@ void loop() {
   }
   else if (localStatus1 == statusOnceOff) {
     Serial.println("Current Status in loop(), One-time(): Off");
-    //ledStrip1.fill(ledStrip1.Color(0, 0, 0),1,30); //RGB
-    ledStrip1.clear(); // Set all pixel colors to 'off'  
-    ledStrip1.show();
+    //ledStripClimber1.fill(ledStripClimber1.Color(0, 0, 0),1,30); //RGB
+    ledStripClimber1.clear(); // Set all pixel colors to 'off'  
+    ledStripClimber1.show();
     n = n + 2;
     firstRun9 = true;
   } // end else if statusOnceOff
@@ -323,12 +328,12 @@ void loop() {
   effectsStatus = ledTimer9.repeatUpdate();
   if (effectsStatus == statusRepeatOn) {
       Serial.println("Current Status in loop(): Effects On");
-      mystrip1.colorWipe(ledStrip3.Color(100,   100,   0), 1); // Yellow
+      mystrip1.colorWipe(ledStripTrap.Color(100,   100,   0), 1); // Yellow
        delay(20);
   } // End if statusRepeatOn
   else if (effectsStatus == statusRepeatOff) {
     Serial.println("Current Status in loop(): Repeat Off");
-      mystrip1.colorWipe(ledStrip3.Color(100,   100,   0), 1); // Yellow
+      mystrip1.colorWipe(ledStripTrap.Color(100,   100,   0), 1); // Yellow
     delay(20);
   } // End else if statusRepeatOff
   else if (effectsStatus == statusOff) {

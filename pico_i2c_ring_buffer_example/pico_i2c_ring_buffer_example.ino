@@ -27,28 +27,38 @@ void loop() {
     Serial.println("Waiting for input");  
     if (char_in == true){
       
-      Serial.print("buff: "); 
+      //Serial.print("buff: "); 
       
      while (!buff.isEmpty()) {
-      Serial.print((char)buff.get()); 
+      //Serial.print((char)buff.get());
+      //Serial.printf("Buff: %c \r\n", (char)buff.get());
+      //Serial.print("\r\n");
+      if (bool localStatus = buff.startsWith("m ")) {
+        //Serial.println("m_xx found");
+        buff.drop(2);
+        int localInt = buff.getNumber();
+        if (localInt == 1){
+          Serial.println("Mode M 1 received");
+        }
+        else if (localInt == 2){
+          Serial.println("Mode M 2 received");
+        }
+        else if (localInt == 3){
+          Serial.println("Mode M 3 received");
+        }
+        else if (localInt == 11){
+          Serial.println("Mode M 11 received");
+        }
+        //Serial.printf("m_xx found with number %s \r\n", localInt);
+        
+        //Serial.println("m_xx found");
+      } // end if
+      
      }
      
-      Serial.print("\r\n");
-/**
-      int n = sizeof(buff);
-      char chars[n+1];
-      memcpy(chars, buff.get(), n);
-      chars[n] = '\0';
-      Serial.println("chars: ",chars);
-**/
-/**
-      int n = sizeof(buff);
-      std::string localString(buff.get(), n);
-      Serial.printf("localString: '%s'\r\n",localString);
-      //Serial.println (buff.get());
-      char_in =  false;
-**/
-    }
+      //Serial.print("\r\n");
+    char_in = false;
+    }// end of if char_in = true
     
 
 
