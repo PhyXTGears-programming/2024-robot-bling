@@ -102,7 +102,7 @@ class CassiusRingBuffer {
       } // end of for loop
 
       return true;
-    } end of matches()
+    } //end of matches()
 
     unsigned int getNumber() {
       if (isEmpty()) {
