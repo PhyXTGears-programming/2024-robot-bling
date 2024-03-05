@@ -7,10 +7,10 @@ CassiusRingBuffer buff;
 
 /////////////////////////////////////////////////////////////////
 // Data Constants
-#define numLedsClimber1 20    // Climber #1
-#define numLedsClimber2 20    // Climber #2
-#define numLedsTrap 36        // Trap
-#define numLedsSpeaker 40     // Speaker
+#define numledClimber1 20    // Climber #1
+#define numledClimber 20    // Climber #2
+#define numledTrap 36        // Trap
+#define numledSpeaker 40     // Speaker
 
 #define ledPinClimber1 16     // Climber #1 ouput pin
 #define ledPinClimber2 17     // Climber #2 ouput pin
@@ -33,13 +33,13 @@ CassiusRingBuffer buff;
 #define midRate 350
 #define slowRate 450
 
-#define picoRed ledsClimber1.Color(255, 0, 0)
-#define picoOrange ledsClimber1.Color(255, 69, 0)
-#define picoYellow ledsClimber1.Color(255, 165, 0)
-#define picoGreen ledsClimber1.Color(0, 255, 0)
-#define picoBlue ledsClimber1.Color(0, 0, 255)
-#define picoPurple ledsClimber1.Color(147, 29, 147)
-#define picoBlack ledsClimber1.Color(0, 0, 0)
+#define picoRed ledClimber1.Color(255, 0, 0)
+#define picoOrange ledClimber1.Color(255, 69, 0)
+#define picoYellow ledClimber1.Color(255, 165, 0)
+#define picoGreen ledClimber1.Color(0, 255, 0)
+#define picoBlue ledClimber1.Color(0, 0, 255)
+#define picoPurple ledClimber1.Color(147, 29, 147)
+#define picoBlack ledClimber1.Color(0, 0, 0)
 
 /////////////////////////////////////////////////////////////////
 // Global control parameters
@@ -82,10 +82,10 @@ bool mode12Enable = false;
 /////////////////////////////////////////////////////////////////
 
 // Needed here before Class ledEffects
-Adafruit_NeoPixel ledsClimber1(numLedsClimber1, ledPinClimber1, NEO_GRB + NEO_KHZ800); 
-Adafruit_NeoPixel ledsClimber2(numLedsClimber2, ledPinClimber2, NEO_GRB + NEO_KHZ800); 
-Adafruit_NeoPixel ledsTrap(numLedsTrap, ledPinTrap, NEO_GRB + NEO_KHZ800); 
-Adafruit_NeoPixel ledsSpeaker(numLedsSpeaker, ledPinSpeaker, NEO_GRB + NEO_KHZ800); 
+Adafruit_NeoPixel ledClimber1(numledClimber1, ledPinClimber1, NEO_GRB + NEO_KHZ800); 
+Adafruit_NeoPixel ledClimber(numledClimber, ledPinClimber2, NEO_GRB + NEO_KHZ800); 
+Adafruit_NeoPixel ledTrap(numledTrap, ledPinTrap, NEO_GRB + NEO_KHZ800); 
+Adafruit_NeoPixel ledSpeaker(numledSpeaker, ledPinSpeaker, NEO_GRB + NEO_KHZ800); 
 
 /////////////////////////////////////////////////////////////////
 class LedTimer {
@@ -172,21 +172,26 @@ class LedTimer {
   void onceSetup(int newRunTime){
     previousTime = millis(); // Timer is running
     endTime = previousTime + newRunTime;
-    Serial.printf("onceSetup: previousTime is: %u \r\n", previousTime);
+    Serial.printf("onceSetup: Startup Time is: %u \r\n", previousTime);
     Serial.printf("onceSetup: endTime is: %u \r\n", endTime);
+    localStatus =  statusOnceOff;
     } // End onceSetup()
 
   int onceUpdate(){
     currentTime = millis();
-    if (currentTime < endTime) {
+    if ((currentTime < endTime) && (localStatus == statusOnceOff)) {
       Serial.printf("onceUpdate: currrentTime is: %u \r\n", currentTime);
       localStatus =  statusOnceOn; // Still in On-time
-      localString = ("onceUpdate: In on-time for " + timerLabel);
+      localString = ("onceUpdate: Starting On-Time for " + timerLabel);
       Serial.println(localString);
       delay(100);
     } // End if
-    currentTime = millis();
-    if (currentTime >= endTime) {
+    else if ((currentTime < endTime) && (localStatus == statusOnceOn)) {
+      Serial.printf("onceUpdate: currrentTime is: %u \r\n", currentTime);
+      localString = ("onceUpdate: Still in On-Time for " + timerLabel);
+      Serial.println(localString);
+    }
+    else if ((currentTime >= endTime) && (localStatus == statusOnceOn)) {
       Serial.printf("onceUpdate: currrentTime is: %u \r\n", currentTime);
       localStatus =  statusOnceOff; // On-time is over
       localString = ("onceUpdate: Reached end time for " + timerLabel);
@@ -207,15 +212,15 @@ LedTimer timerSpeaker("Timer-Speaker");
 void setup() {
     Serial.begin(115200);
     delay(3000);
-    ledsClimber1.begin(); // INITIALIZE NeoPixel strip object
-    ledsClimber1.fill(ledsClimber1.Color(0, 0, 0),0,30); //RGB
-    ledsClimber1.show(); // Set all pixel colors to 'off'
-    ledsClimber1.setBrightness(65);
-    ledsClimber1.clear();
-    ledsClimber1.show();
-    ledsTrap.begin(); // INITIALIZE NeoPixel strip object
-    ledsTrap.show();
-    ledsTrap.setBrightness(65);
+    ledClimber1.begin(); // INITIALIZE NeoPixel strip object
+    ledClimber1.fill(ledClimber1.Color(0, 0, 0),0,30); //RGB
+    ledClimber1.show(); // Set all pixel colors to 'off'
+    ledClimber1.setBrightness(65);
+    ledClimber1.clear();
+    ledClimber1.show();
+    ledTrap.begin(); // INITIALIZE NeoPixel strip object
+    ledTrap.show();
+    ledTrap.setBrightness(65);
 
 } // End setup()
 
@@ -238,81 +243,81 @@ int onceLed(int newLedStrip, uint32_t newOnColor, uint32_t newOffColor, long new
     // One-time Status:
     // statusOnceOn - Still in On-time
     // statusOnceOff - On-time is over
-    Serial.println("onceLed: Starting One-Time mode for ledsClimber1");
-    ledsClimber1.fill(newOnColor,0,numLedsClimber1); // On-Color
-    ledsClimber1.show(); 
+    Serial.println("onceLed: Starting One-Time mode for ledClimber1");
+    ledClimber1.fill(newOnColor,0,numledClimber1); // On-Color
+    ledClimber1.show(); 
     timerClimber1.onceSetup(newTimeOut);
     startTimerClimber1 = false;
   } // End startTimerClimber1 
   localStatus = timerClimber1.onceUpdate();
   if (localStatus == statusOnceOn) {
-    Serial.println("onceLed: One-Time Mode is ON for ledsClimber1");
+    Serial.println("onceLed: One-Time Mode is ON for ledClimber1");
     delay(100);
   } // End if statusOnceOn
   else if (localStatus == statusOnceOff) {
-    Serial.println("onceLed: One-Time is OFF for ledsClimber1");
-    ledsClimber1.fill(newOffColor,0,numLedsClimber1); // Off-Color
-    ledsClimber1.show();
+    Serial.println("onceLed: One-Time is OFF for ledClimber1");
+    ledClimber1.fill(newOffColor,0,numledClimber1); // Off-Color
+    ledClimber1.show();
   } // end else if statusOnceOff
   } // End Led Strip is 1
 ////////////////////////////////////////////////////////////////////
   else if (newLedStrip == 2) {
     if (startTimerClimber2 == true) {
     Serial.println("onceLed: Starting One-Time mode for ledStip2");
-    ledsClimber2.fill(newOnColor,0,numLedsClimber2); // On-Color
-    ledsClimber2.show(); 
+    ledClimber.fill(newOnColor,0,numledClimber); // On-Color
+    ledClimber.show(); 
     timerClimber2.onceSetup(newTimeOut);
     startTimerClimber2 = false;
   } // End startTimerClimber2 
   localStatus = timerClimber2.onceUpdate();
   if (localStatus == statusOnceOn) {
-    Serial.println("onceLed: One-Time Mode is ON for ledsClimber2");
+    Serial.println("onceLed: One-Time Mode is ON for ledClimber");
     delay(100);
   } // End if statusOnceOn
   else if (localStatus == statusOnceOff) {
-    Serial.println("onceLed: One-Time is OFF for ledsClimber2");
-    ledsClimber2.fill(newOffColor,0,numLedsClimber2); // Off-Color
-    ledsClimber2.show();
+    Serial.println("onceLed: One-Time is OFF for ledClimber");
+    ledClimber.fill(newOffColor,0,numledClimber); // Off-Color
+    ledClimber.show();
   } // end else if statusOnceOff
   } // End Led Strip is 2
 ////////////////////////////////////////////////////////////////////
   else if (newLedStrip == 3) {
     if (startTimerTrap == true) {
     Serial.println("onceLed: Starting One-Time mode for ledStip3");
-    ledsTrap.fill(newOnColor,0,numLedsTrap); // On-Color
-    ledsTrap.show(); 
+    ledTrap.fill(newOnColor,0,numledTrap); // On-Color
+    ledTrap.show(); 
     timerTrap.onceSetup(newTimeOut);
     startTimerTrap = false;
   } // End startTimerTrap 
   localStatus = timerTrap.onceUpdate();
   if (localStatus == statusOnceOn) {
-    Serial.println("onceLed: One-Time Mode is ON for ledsTrap");
+    Serial.println("onceLed: One-Time Mode is ON for ledTrap");
     delay(100);
   } // End if statusOnceOn
   else if (localStatus == statusOnceOff) {
-    Serial.println("One-Time is OFF for ledsTrap");
-    ledsTrap.fill(newOffColor,0,numLedsTrap); // Off-Color
-    ledsTrap.show();
+    Serial.println("One-Time is OFF for ledTrap");
+    ledTrap.fill(newOffColor,0,numledTrap); // Off-Color
+    ledTrap.show();
   } // end else if statusOnceOff
   } // End Led Strip is 3
 ////////////////////////////////////////////////////////////////////
   else if (newLedStrip == 4) {
      if (startTimerSpeaker == true) {
     Serial.println("onceLed: Starting One-Time mode for ledStip4");
-    ledsSpeaker.fill(newOnColor,0,numLedsSpeaker); // On-Color
-    ledsSpeaker.show(); 
+    ledSpeaker.fill(newOnColor,0,numledSpeaker); // On-Color
+    ledSpeaker.show(); 
     timerSpeaker.onceSetup(newTimeOut);
     startTimerSpeaker = false;
   } // End startTimerSpeaker 
   localStatus = timerSpeaker.onceUpdate();
   if (localStatus == statusOnceOn) {
-    Serial.println("onceLed: One-Time Mode is ON for ledsSpeaker");
+    Serial.println("onceLed: One-Time Mode is ON for ledSpeaker");
     delay(100);
   } // End if statusOnceOn
   else if (localStatus == statusOnceOff) {
-    Serial.println("onceLed: One-Time is OFF for ledsSpeaker");
-    ledsSpeaker.fill(newOffColor,0,numLedsSpeaker); // Off-Color
-    ledsSpeaker.show();
+    Serial.println("onceLed: One-Time is OFF for ledSpeaker");
+    ledSpeaker.fill(newOffColor,0,numledSpeaker); // Off-Color
+    ledSpeaker.show();
   } // end else if statusOnceOff
   } // End Led Strip is 4  
   return localStatus;
@@ -337,31 +342,31 @@ int repeatLed(int newLedStrip, uint32_t newOnColor, uint32_t newOffColor, uint32
   if (localStatus == statusRepeatOn) {
       Serial.println("repeatLed: Current Status in loop(): Repeat On");
       // xxx.fill(color, first, count);
-      ledsClimber1.fill(newOnColor,0,numLedsClimber1); // On-Color
-      ledsClimber1.show(); 
+      ledClimber1.fill(newOnColor,0,numledClimber1); // On-Color
+      ledClimber1.show(); 
       delay(100);
   } // End if statusRepeatOn
   else if (localStatus == statusRepeatOff) {
     Serial.println("repeatLed: Current Status in loop(): Repeat Off");
-    ledsClimber1.fill(newOffColor,0,numLedsClimber1); // Off-Color
-    ledsClimber1.show();
+    ledClimber1.fill(newOffColor,0,numledClimber1); // Off-Color
+    ledClimber1.show();
     delay(100);
   } // End else if statusRepeatOff
   else if (localStatus == statusOff) {
     //startTimerClimber1 = true; // Ready of next repeat cycle
     Serial.println("repeatLed: Current Status in loop(): Off; End time reached");
-    ledsClimber1.fill(localBlack,0,numLedsClimber1);
-    ledsClimber1.show();
+    ledClimber1.fill(localBlack,0,numledClimber1);
+    ledClimber1.show();
     delay(100);
     }// End else if statusOff
-  } // End ledsClimber1
+  } // End ledClimber1
 ////////////////////////////////////////////////////////////////////
   if (newLedStrip == 2) {
     if (startTimerClimber2 == true) { // Start of the repeat cycle
       Serial.println("repeatLed: Starting Repeat mode for ledStip2");
       // xxx.fill(color, first, count);
-      ledsClimber2.fill(newOffColor,0,numLedsClimber2); // Off-Color
-      ledsClimber2.show(); 
+      ledClimber.fill(newOffColor,0,numledClimber); // Off-Color
+      ledClimber.show(); 
       delay(100); // wait a moment before timer starts
       timerClimber2.repeatSetup(newOnTime, newOffTime, newRunTime);
       delay(100);                                                              
@@ -370,32 +375,32 @@ int repeatLed(int newLedStrip, uint32_t newOnColor, uint32_t newOffColor, uint32
   localStatus = timerClimber2.repeatUpdate(); // Checking on timer status
   if (localStatus == statusRepeatOn) {
       Serial.println("repeatLed: Current Status in loop(): Repeat On");
-      ledsClimber2.fill(newOnColor,0,numLedsClimber2); // On-Color
-      ledsClimber2.show(); 
+      ledClimber.fill(newOnColor,0,numledClimber); // On-Color
+      ledClimber.show(); 
       delay(100);
   } // End if statusRepeatOn
   else if (localStatus == statusRepeatOff) {
     Serial.println("repeatLed: Current Status in loop(): Repeat Off");
-    ledsClimber2.fill(newOffColor,0,numLedsClimber2); // Off-Color
-    ledsClimber2.show();
+    ledClimber.fill(newOffColor,0,numledClimber); // Off-Color
+    ledClimber.show();
     delay(100);
   } // End else if statusRepeatOff
   else if (localStatus == statusOff) {
     //startTimerClimber2 = true; // Ready of next repeat cycle
     Serial.println("repeatLed: Current Status in loop(): Off; End time reached");
-    ledsClimber2.fill(localBlack,0,numLedsClimber2);
-    ledsClimber2.show();
+    ledClimber.fill(localBlack,0,numledClimber);
+    ledClimber.show();
     delay(100);
     }// End else if statusOff
-  } // End ledsClimber2
+  } // End ledClimber
 
 ////////////////////////////////////////////////////////////////////
   if (newLedStrip == 3) {
     if (startTimerTrap == true) { // Start of the repeat cycle
       Serial.println("repeatLed: Starting Repeat mode for ledStip3");
       // xxx.fill(color, first, count);
-      ledsTrap.fill(newOffColor,0,numLedsTrap); // Off-Color
-      ledsTrap.show(); 
+      ledTrap.fill(newOffColor,0,numledTrap); // Off-Color
+      ledTrap.show(); 
       delay(100); // wait a moment before timer starts
       timerTrap.repeatSetup(newOnTime, newOffTime, newRunTime);
       delay(100);                                                              
@@ -404,32 +409,32 @@ int repeatLed(int newLedStrip, uint32_t newOnColor, uint32_t newOffColor, uint32
   localStatus = timerTrap.repeatUpdate(); // Checking on timer status
   if (localStatus == statusRepeatOn) {
       Serial.println("repeatLed: Current Status in loop(): Repeat On");
-      ledsTrap.fill(newOnColor,0,numLedsTrap); // On-Color
-      ledsTrap.show(); 
+      ledTrap.fill(newOnColor,0,numledTrap); // On-Color
+      ledTrap.show(); 
       delay(100);
   } // End if statusRepeatOn
   else if (localStatus == statusRepeatOff) {
     Serial.println("repeatLed: Current Status in loop(): Repeat Off");
-    ledsTrap.fill(newOffColor,0,numLedsTrap); // Off-Color
-    ledsTrap.show();
+    ledTrap.fill(newOffColor,0,numledTrap); // Off-Color
+    ledTrap.show();
     delay(100);
   } // End else if statusRepeatOff
   else if (localStatus == statusOff) {
     //startTimerTrap = true; // Ready of next repeat cycle
     Serial.println("repeatLed: Current Status in loop(): Off; End time reached");
-    ledsTrap.fill(localBlack,0,numLedsTrap);
-    ledsTrap.show();
+    ledTrap.fill(localBlack,0,numledTrap);
+    ledTrap.show();
     delay(100);
     }// End else if statusOff
-  } // End ledsTrap
+  } // End ledTrap
 
 ////////////////////////////////////////////////////////////////////
   if (newLedStrip == 4) {
     if (startTimerSpeaker == true) { // Start of the repeat cycle
       Serial.println("repeatLed: Starting Repeat mode for ledStip4");
       // xxx.fill(color, first, count);
-      ledsSpeaker.fill(newOffColor,0,numLedsSpeaker); // Off-Color
-      ledsSpeaker.show(); 
+      ledSpeaker.fill(newOffColor,0,numledSpeaker); // Off-Color
+      ledSpeaker.show(); 
       delay(100); // wait a moment before timer starts
       timerSpeaker.repeatSetup(newOnTime, newOffTime, newRunTime);
       delay(100);                                                              
@@ -438,24 +443,24 @@ int repeatLed(int newLedStrip, uint32_t newOnColor, uint32_t newOffColor, uint32
   localStatus = timerSpeaker.repeatUpdate(); // Checking on timer status
   if (localStatus == statusRepeatOn) {
       Serial.println("repeatLed: Current Status in loop(): Repeat On");
-      ledsSpeaker.fill(newOnColor,0,numLedsSpeaker); // On-Color
-      ledsSpeaker.show(); 
+      ledSpeaker.fill(newOnColor,0,numledSpeaker); // On-Color
+      ledSpeaker.show(); 
       delay(100);
   } // End if statusRepeatOn
   else if (localStatus == statusRepeatOff) {
     Serial.println("repeatLed: Current Status in loop(): Repeat Off");
-    ledsSpeaker.fill(newOffColor,0,numLedsSpeaker); // Off-Color
-    ledsSpeaker.show();
+    ledSpeaker.fill(newOffColor,0,numledSpeaker); // Off-Color
+    ledSpeaker.show();
     delay(100);
   } // End else if statusRepeatOff
   else if (localStatus == statusOff) {
     //startTimerSpeaker = true; // Ready of next repeat cycle
     Serial.println("repeatLed: Current Status in loop(): Off; End time reached");
-    ledsSpeaker.fill(localBlack,0,numLedsSpeaker);
-    ledsSpeaker.show();
+    ledSpeaker.fill(localBlack,0,numledSpeaker);
+    ledSpeaker.show();
     delay(100);
     }// End else if statusOff
-  } // End ledsSpeaker
+  } // End ledSpeaker
   return localStatus;    
 } // End repeatLedUpdate()
 
@@ -489,15 +494,17 @@ void mode2(){
   if (mode2Enable == true){
     int localStatus = 0;
     startTimerClimber1 = true;
-    onceLed(1, picoYellow, picoBlack, timeOut1);
-    //onceLed(2, picoYellow, picoBlack, timeOut2);
-    //onceLed(3, picoYellow, picoBlack, timeOut3);
-    localStatus = onceLed(4, picoYellow, picoBlack, timeOut4);
+    localStatus = onceLed(1, picoYellow, picoBlack, timeOut1);
     if (localStatus == statusOnceOff) {
       Serial.println("Mode-2: M2 statusOnceOff");
       mode2Enable = false;
       startTimerClimber1 = false;  
     } // End if statusOnceOff
+    
+    //onceLed(2, picoYellow, picoBlack, timeOut2);
+    //onceLed(3, picoYellow, picoBlack, timeOut3);
+    //onceLed(4, picoYellow, picoBlack, timeOut4)
+    
   } // End mode2Enable
 } // End mode2()
 
