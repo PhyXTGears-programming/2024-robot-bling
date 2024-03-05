@@ -233,9 +233,17 @@ void loop1() {
         
         else if (localInt1 == 11){
           Serial.println("Mode M 11 received");
-          twoColor(ledClimber1,picoBlue,picoBlack, currentFlashRate, currentFlashRate, currentTimeout);
-        } // End "M 1!"
-      } // end if "m_xx found"
+          if (ledStripsUsed == 1) {
+            twoColor(ledClimber1,picoBlue,picoBlack, currentFlashRate, currentFlashRate, currentTimeout);
+          } // End Led Strips Used is 1
+          else if (ledStripsUsed == 2){
+            twoColor(ledTrap,picoBlue,picoBlack, currentFlashRate, currentFlashRate, currentTimeout);
+          } // End Led Strips Used is 2
+          else if (ledStripsUsed == 3){
+            twoColor(ledSpeaker,picoBlue,picoBlack, currentFlashRate, currentFlashRate, currentTimeout);
+          } // End Led Strips Used is 3
+        } // End "M 11"
+        } // end if "m_xx found"
      else if (bool localStatus = buff.startsWith("p ")) {
         //Serial.println("p_xx found");
         buff.drop(2);
