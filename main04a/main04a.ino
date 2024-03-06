@@ -7,7 +7,7 @@ CassiusRingBuffer buff;
 
 /////////////////////////////////////////////////////////////////
 // Data Constants
-#define numledClimber1 20    // Climber #1
+#define numledClimber1 35    // Climber #1
 #define numledClimber2 20    // Climber #2
 #define numledTrap 36        // Trap
 #define numledSpeaker 40     // Speaker
@@ -142,6 +142,7 @@ void setup1() {
   //delay(5000);//////////////////////////////////////ERASE THIS AFTER TESTING
   Wire.setSDA(8);
   Wire.setSCL(9);
+  Wire.setClock(100000);
   Wire.onReceive(recv);
   Wire.begin(0x30);
   Serial.begin(115200);
@@ -157,7 +158,8 @@ void loop1() {
   // Print out string from controller
     
   if (char_in == true){
-     while (!buff.isEmpty()) {
+    Serial.println("char_in is true");
+    while (!buff.isEmpty() && !buff.isFull()) {
       //Serial.print((char)buff.get());
       //Serial.printf("Buff: %c \r\n", (char)buff.get());
       //Serial.print("\r\n");
@@ -260,7 +262,7 @@ void loop1() {
           Serial.println("Mode P 33 received");
           currentTimeout = longTimeout;
         } // End "P 33"
-          if (localInt2 == 21){
+        else if (localInt2 == 21){
           Serial.println("Mode P 21 received");
           currentFlashRate = slowRate;
         } // End "P 21"
@@ -272,7 +274,7 @@ void loop1() {
           Serial.println("Mode P 23 received");
           currentFlashRate = fastRate;
         } // End "P 23"
-          if (localInt2 == 11){
+        else if (localInt2 == 11){
           Serial.println("Mode P 11 received");
           currentBrightness = lowBright;
         } // End "P 11"
@@ -287,17 +289,21 @@ void loop1() {
 
         
      } // end if "p_xx found"
+     else {
+        buff.drop(2);
+     }
      } // end if buff not empty
     }// end of if char_in = true
-}//end of loop1()
+    }//end of loop1()
 
 
 // Called when the I2C responder gets written to
 void recv(int len) {
     int i;
-    for (i=0; i<len; i++) buff.put(Wire.read());
-
-    //buff.put(/*the byte we got over I2C*/);
+    for (i=0; i<len; i++) {
+      delay(10);
+      buff.put(Wire.read());
+    }
     char_in =  true;
 
 } // end of recv()
