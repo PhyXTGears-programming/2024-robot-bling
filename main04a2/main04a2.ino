@@ -1,11 +1,10 @@
-
 #include <string>
 #include "RingBuffer.h"
 #include <Adafruit_NeoPixel.h>
 
 CassiusRingBuffer buff;
 
-/////////////////////////////////////////////////////////////////
+/////////////////////////////////
 // Data Constants
 #define numledClimber1 35    // Climber #1
 #define numledClimber2 20    // Climber #2
@@ -37,7 +36,7 @@ CassiusRingBuffer buff;
 #define picoPurple ledClimber1.Color(int(0.58*currentBrightness), int(0.11*currentBrightness), int(0.58*currentBrightness))
 #define picoBlack ledClimber1.Color(0, 0, 0)
 
-/////////////////////////////////////////////////////////////////
+/////////////////////////////////
 // Global control parameters
 
 int ledStripsUsed = 1;
@@ -54,16 +53,16 @@ int currentFlashRate = midRate;
 int currentBrightness = midBright;
 // Low Bright; Mid Bright; High Bright
 
-/////////////////////////////////////////////////////////////////
+/////////////////////////////////
 
 Adafruit_NeoPixel ledClimber1(numledClimber1, ledPinClimber1, NEO_GRB + NEO_KHZ800); 
 Adafruit_NeoPixel ledClimber2(numledClimber2, ledPinClimber2, NEO_GRB + NEO_KHZ800); 
 Adafruit_NeoPixel ledTrap(numledTrap, ledPinTrap, NEO_GRB + NEO_KHZ800); 
 Adafruit_NeoPixel ledSpeaker(numledSpeaker, ledPinSpeaker, NEO_GRB + NEO_KHZ800); 
 
-/////////////////////////////////////////////////////////////////
+/////////////////////////////////
 
-void oneColor(Adafruit_NeoPixel newLedStrip, int newColor, long newDuration) {
+void oneColor(int newLedStrip, int newColor, long newDuration) {
   //Serial.println("Starting oneColor() ");
   long endTime = millis() + newDuration;
   //Serial.printf("End Time is: %u, \n\r",endTime);
@@ -71,19 +70,31 @@ void oneColor(Adafruit_NeoPixel newLedStrip, int newColor, long newDuration) {
   while (millis() < endTime){
     //Serial.println("In while < endtime");
     //Serial.printf("Current Time is %u, \n\r",millis());
-    newLedStrip.fill(newColor,0,10);
-    newLedStrip.show();
+    if (newLedStrip = 1) {
+      ledClimber1.fill(newColor,0,10);
+      ledClimber1.show();
+    }
+    else if (newLedStrip = 2) {
+      ledTrap.fill(newColor,0,10);
+      ledTrap.show();
+    }    
     delay(150);
   } // End while < newTime 
   //Serial.printf("Ending Time is %u, \n\r",millis());
-  newLedStrip.clear();
-  newLedStrip.show();
+  if (newLedStrip = 1) {
+    ledClimber1.clear();
+    ledClimber1.show();
+    }
+    else if (newLedStrip = 2) {
+      ledTrap.clear();
+      ledTrap.show();
+    }  
   //Serial.println("Ending oneColor() ");
 } // End oneColor
 
-/////////////////////////////////////////////////////////////////
+/////////////////////////////////
 
-void twoColor(Adafruit_NeoPixel newLedStrip, uint32_t newOnColor, uint32_t newOffColor, long newOnTime, long newOffTime, long newDuration ) {
+void twoColor(int newLedStrip, uint32_t newOnColor, uint32_t newOffColor, long newOnTime, long newOffTime, long newDuration ) {
   //Serial.println("Starting twoColor() ");
   long endTime = millis() + newDuration;
   long currentTime = millis();
@@ -92,15 +103,27 @@ void twoColor(Adafruit_NeoPixel newLedStrip, uint32_t newOnColor, uint32_t newOf
   while (millis() < endTime){
     //Serial.println("In while < endtime");
     //Serial.printf("Current Time is %u, \n\r",millis());
-    newLedStrip.fill(newOnColor,0,10);
-    newLedStrip.show();
+    if (newLedStrip = 1) {
+      ledClimber1.fill(newOnColor,0,10);
+      ledClimber1.show();
+    }
+    else if (newLedStrip = 2) {
+      ledTrap.fill(newOnColor,0,10);
+      ledTrap.show();
+    }
     nextTime = millis() + newOnTime;
     while (millis() < nextTime){ // LED Strip is on
       //Serial.printf("Time while LED strip is on: %u, \n\r",millis());
       delay(150);
     } // End while on-time
-    newLedStrip.fill(newOffColor,0,10);
-    newLedStrip.show();
+    if (newLedStrip = 1) {
+      ledClimber1.fill(newOffColor,0,10);
+      ledClimber1.show();
+    }
+    else if (newLedStrip = 2) {
+      ledTrap.fill(newOffColor,0,10);
+      ledTrap.show();
+    }
     nextTime = millis() + newOffTime;
     while (millis() < nextTime){ // LED Strip is oFF
       //Serial.printf("Time while LED strip is off: %u, \n\r",millis());
@@ -109,12 +132,18 @@ void twoColor(Adafruit_NeoPixel newLedStrip, uint32_t newOnColor, uint32_t newOf
   //delay(100);
   } // End while <  End Time 
   //Serial.printf("Ending Time is %u, \n\r",millis());
-  newLedStrip.clear();
-  newLedStrip.show();
+  if (newLedStrip = 1) {
+    ledClimber1.clear();
+    ledClimber1.show();
+   }
+   else if (newLedStrip = 2) {
+      ledTrap.clear();
+      ledTrap.show();
+    }     
   //Serial.println("Ending twoColor() ");
 } // End twoColor
 
-/////////////////////////////////////////////////////////////////
+/////////////////////////////////
 
 void setup() {
 
@@ -138,93 +167,93 @@ void setup() {
 
 } // End setup()
 
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////
 void loop() {    
 
 delay(20);
 } // End loop()
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////
 
 
 void setup1() {
-  //delay(5000);//////////////////////////////////////ERASE THIS AFTER TESTING
+  //delay(5000);////////////////////ERASE THIS AFTER TESTING
   Wire.setSDA(8);
   Wire.setSCL(9);
   Wire.setClock(100000);
   Wire.onReceive(recv);
   Wire.begin(0x30);
-  //Serial.begin(115200);
-  //Serial.println("I2C Scanning for input..");
+  Serial.begin(115200);
+  Serial.println("I2C Scanning for input..");
 }
 
 bool char_in = false;
 void loop1() {
   delay(1000);
-  ////Serial.println("Waiting for input");  
+  //Serial.println("Waiting for input");  
   //char data = ((char)buff.get()); 
 
   // Print out string from controller
     
   if (char_in == true){
-    ////Serial.println("char_in is true");
+    //Serial.println("char_in is true");
     while (!buff.isEmpty() && !buff.isFull()) {
-      ////Serial.print((char)buff.get());
-      ////Serial.printf("Buff: %c \r\n", (char)buff.get());
-      ////Serial.print("\r\n");
+      //Serial.print((char)buff.get());
+      //Serial.printf("Buff: %c \r\n", (char)buff.get());
+      //Serial.print("\r\n");
       if (bool localStatus = buff.startsWith("m ")) {
-        ////Serial.println("m_xx found");
+        //Serial.println("m_xx found");
         buff.drop(2);
         int localInt1 = buff.getNumber();
         //buff.drop(2);
         if (localInt1 == 1){
           //Serial.println("Mode M 1 received: Red");
           if (ledStripsUsed == 1) {
-            oneColor(ledClimber1,picoRed,currentTimeout);
+            oneColor(1,picoRed,currentTimeout);
           } // End Led Strips Used is 1
           else if (ledStripsUsed == 2){
-            oneColor(ledTrap,picoRed,currentTimeout);
+            oneColor(2,picoRed,currentTimeout);
           } // End Led Strips Used is 2
           else if (ledStripsUsed == 3){
-            oneColor(ledSpeaker,picoRed,currentTimeout);
+            oneColor(3,picoRed,currentTimeout);
           } // End Led Strips Used is 3
         } // End "M 1"
         
         else if (localInt1 == 2){
           //Serial.println("Mode M 2 received: Yellow");
           if (ledStripsUsed == 1) {
-            oneColor(ledClimber1,picoYellow,currentTimeout);
+            oneColor(1,picoYellow,currentTimeout);
           } // End Led Strips Used is 1
           else if (ledStripsUsed == 2){
-            oneColor(ledTrap,picoYellow,currentTimeout);
+            oneColor(2,picoYellow,currentTimeout);
           } // End Led Strips Used is 2
           else if (ledStripsUsed == 3){
-            oneColor(ledSpeaker,picoYellow,currentTimeout);
+            oneColor(3,picoYellow,currentTimeout);
           } // End Led Strips Used is 3
         } // End "M 2"
         
         else if (localInt1 == 3){
           //Serial.println("Mode M 3 received: Green");
           if (ledStripsUsed == 1) {
-            oneColor(ledClimber1,picoGreen,currentTimeout);
+            oneColor(1,picoGreen,currentTimeout);
           } // End Led Strips Used is 1
           else if (ledStripsUsed == 2){
-            oneColor(ledTrap,picoGreen,currentTimeout);
+            oneColor(2,picoGreen,currentTimeout);
           } // End Led Strips Used is 2
           else if (ledStripsUsed == 3){
-            oneColor(ledSpeaker,picoGreen,currentTimeout);
+            oneColor(3,picoGreen,currentTimeout);
           } // End Led Strips Used is 3
         } // End "M 3"
 
         else if (localInt1 == 5){
           //Serial.println("Mode M 5 received: Orange");
           if (ledStripsUsed == 1) {
-            oneColor(ledClimber1,picoOrange,currentTimeout);
+            oneColor(1,picoOrange,currentTimeout);
           } // End Led Strips Used is 1
           else if (ledStripsUsed == 2){
-            oneColor(ledTrap,picoOrange,currentTimeout);
+            oneColor(2,picoOrange,currentTimeout);
           } // End Led Strips Used is 2
           else if (ledStripsUsed == 3){
-            oneColor(ledSpeaker,picoOrange,currentTimeout);
+            oneColor(3,picoOrange,currentTimeout);
           } // End Led Strips Used is 3
         } // End "M 5"
 
@@ -232,32 +261,32 @@ void loop1() {
         else if (localInt1 == 6){
           //Serial.println("Mode M 6 received: Purple");
           if (ledStripsUsed == 1) {
-            oneColor(ledClimber1,picoPurple,currentTimeout);
+            oneColor(1,picoPurple,currentTimeout);
           } // End Led Strips Used is 1
           else if (ledStripsUsed == 2){
-            oneColor(ledTrap,picoPurple,currentTimeout);
+            oneColor(2,picoPurple,currentTimeout);
           } // End Led Strips Used is 2
           else if (ledStripsUsed == 3){
-            oneColor(ledSpeaker,picoPurple,currentTimeout);
+            oneColor(3,picoPurple,currentTimeout);
           } // End Led Strips Used is 3
         } // End "M 6"
         
         else if (localInt1 == 11){
           //Serial.println("Mode M 11 received: Flashing Blue");
           if (ledStripsUsed == 1) {
-            twoColor(ledClimber1,picoBlue,picoBlack, currentFlashRate, currentFlashRate, currentTimeout);
+            twoColor(1,picoBlue,picoBlack, currentFlashRate, currentFlashRate, currentTimeout);
           } // End Led Strips Used is 1
           else if (ledStripsUsed == 2){
-            twoColor(ledTrap,picoBlue,picoBlack, currentFlashRate, currentFlashRate, currentTimeout);
+            twoColor(2,picoBlue,picoBlack, currentFlashRate, currentFlashRate, currentTimeout);
           } // End Led Strips Used is 2
           else if (ledStripsUsed == 3){
-            twoColor(ledSpeaker,picoBlue,picoBlack, currentFlashRate, currentFlashRate, currentTimeout);
+            twoColor(3,picoBlue,picoBlack, currentFlashRate, currentFlashRate, currentTimeout);
           } // End Led Strips Used is 3
         } // End "M 11"
         } // end if "m_xx found"
         
      else if (bool localStatus = buff.startsWith("p ")) {
-        ////Serial.println("p_xx found");
+        //Serial.println("p_xx found");
         buff.drop(2);
         int localInt2 = buff.getNumber();
         if (localInt2 == 31){
@@ -296,6 +325,18 @@ void loop1() {
           //Serial.println("Mode P 13 received: High Brightness");
           currentBrightness = highBright;
         } // End "P 13"
+        else if (localInt2 == 1){
+          Serial.println("Mode P 1 received: Climber Led Strip");
+          ledStripsUsed = 1;
+        } // End "P 1"
+        else if (localInt2 == 2){
+          Serial.println("Mode P 2 received: Trap Led Strip");
+          ledStripsUsed = 2;
+        } // End "P 2"
+        else if (localInt2 == 3){
+          Serial.println("Mode P 1 received: Climber Led Strip");
+          ledStripsUsed = 3;
+        } // End "P 3"
      } // end if "p_xx found"
      else {
         //buff.drop(3);
