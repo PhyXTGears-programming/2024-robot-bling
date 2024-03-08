@@ -6,15 +6,13 @@ CassiusRingBuffer buff;
 
 /////////////////////////////////
 // Data Constants
-#define numledClimber1 35    // Climber #1
-#define numledClimber2 20    // Climber #2
-#define numledTrap 36        // Trap
-#define numledSpeaker 40     // Speaker
+#define numLedClimber 35    // # of Climber Leds
+#define numLedTrap 36       // # of Trap Leds
+#define numLedSpeaker 40    // # of Speaker Leds
 
-#define ledPinClimber1 16     // Climber #1 ouput pin
-#define ledPinClimber2 17     // Climber #2 ouput pin
-#define ledPinTrap 18         // Trap ouput pin
-#define ledPinSpeaker 19      // Speaker ouput pin
+#define ledPinClimber 16    // Climber ouput pin
+#define ledPinTrap 20       // Trap ouput pin
+#define ledPinSpeaker 19    // Speaker ouput pin
 
 #define shortTimeout 6000
 #define midTimeout 10000
@@ -28,19 +26,19 @@ CassiusRingBuffer buff;
 #define midBright  170
 #define highBright 255
 
-#define picoRed ledClimber1.Color(currentBrightness, 0, 0)
-#define picoOrange ledClimber1.Color(currentBrightness, int(0.27*currentBrightness), 0)
-#define picoYellow ledClimber1.Color(currentBrightness, int(0.65*currentBrightness), 0)
-#define picoGreen ledClimber1.Color(0, currentBrightness, 0)
-#define picoBlue ledClimber1.Color(0, 0, currentBrightness)
-#define picoPurple ledClimber1.Color(int(0.58*currentBrightness), int(0.11*currentBrightness), int(0.58*currentBrightness))
-#define picoBlack ledClimber1.Color(0, 0, 0)
+#define picoRed ledClimber.Color(currentBrightness, 0, 0)
+#define picoOrange ledClimber.Color(currentBrightness, int(0.27*currentBrightness), 0)
+#define picoYellow ledClimber.Color(currentBrightness, int(0.65*currentBrightness), 0)
+#define picoGreen ledClimber.Color(0, currentBrightness, 0)
+#define picoBlue ledClimber.Color(0, 0, currentBrightness)
+#define picoPurple ledClimber.Color(int(0.58*currentBrightness), int(0.11*currentBrightness), int(0.58*currentBrightness))
+#define picoBlack ledClimber.Color(0, 0, 0)
 
 /////////////////////////////////
 // Global control parameters
 
 int ledStripsUsed = 1;
-// #1 is Climber1 & 2
+// #1 is Climber
 // #2 is Trap
 // #3 is Speaker
 
@@ -55,10 +53,11 @@ int currentBrightness = midBright;
 
 /////////////////////////////////
 
-Adafruit_NeoPixel ledClimber1(numledClimber1, ledPinClimber1, NEO_GRB + NEO_KHZ800); 
-Adafruit_NeoPixel ledClimber2(numledClimber2, ledPinClimber2, NEO_GRB + NEO_KHZ800); 
-Adafruit_NeoPixel ledTrap(numledTrap, ledPinTrap, NEO_GRB + NEO_KHZ800); 
-Adafruit_NeoPixel ledSpeaker(numledSpeaker, ledPinSpeaker, NEO_GRB + NEO_KHZ800); 
+Adafruit_NeoPixel ledTrap = Adafruit_NeoPixel(numLedTrap, ledPinTrap, NEO_GRB + NEO_KHZ800); 
+
+Adafruit_NeoPixel ledClimber = Adafruit_NeoPixel(numLedClimber, ledPinClimber, NEO_GRB + NEO_KHZ800); 
+
+Adafruit_NeoPixel ledSpeaker = Adafruit_NeoPixel(numLedSpeaker, ledPinSpeaker, NEO_GRB + NEO_KHZ800); 
 
 /////////////////////////////////
 
@@ -70,22 +69,22 @@ void oneColor(int newLedStrip, int newColor, long newDuration) {
   while (millis() < endTime){
     //Serial.println("In while < endtime");
     //Serial.printf("Current Time is %u, \n\r",millis());
-    if (newLedStrip = 1) {
-      ledClimber1.fill(newColor,0,10);
-      ledClimber1.show();
+    if (ledStripsUsed == 1) {
+      ledClimber.fill(newColor,0,numLedClimber);
+      ledClimber.show();
     }
-    else if (newLedStrip = 2) {
-      ledTrap.fill(newColor,0,10);
+    else if (ledStripsUsed == 2) {
+      ledTrap.fill(newColor,0,numLedTrap);
       ledTrap.show();
     }    
     delay(150);
   } // End while < newTime 
-  //Serial.printf("Ending Time is %u, \n\r",millis());
-  if (newLedStrip = 1) {
-    ledClimber1.clear();
-    ledClimber1.show();
+  Serial.printf("Ending Time for One-Color is %u secs, \n\r",int(millis()/1000));
+  if (ledStripsUsed == 1) {
+    ledClimber.clear();
+    ledClimber.show();
     }
-    else if (newLedStrip = 2) {
+    else if (ledStripsUsed == 2) {
       ledTrap.clear();
       ledTrap.show();
     }  
@@ -103,12 +102,12 @@ void twoColor(int newLedStrip, uint32_t newOnColor, uint32_t newOffColor, long n
   while (millis() < endTime){
     //Serial.println("In while < endtime");
     //Serial.printf("Current Time is %u, \n\r",millis());
-    if (newLedStrip = 1) {
-      ledClimber1.fill(newOnColor,0,10);
-      ledClimber1.show();
+    if (ledStripsUsed == 1) {
+      ledClimber.fill(newOnColor,0,numLedClimber);
+      ledClimber.show();
     }
-    else if (newLedStrip = 2) {
-      ledTrap.fill(newOnColor,0,10);
+    else if (ledStripsUsed == 2) {
+      ledTrap.fill(newOnColor,0,numLedTrap);
       ledTrap.show();
     }
     nextTime = millis() + newOnTime;
@@ -116,12 +115,12 @@ void twoColor(int newLedStrip, uint32_t newOnColor, uint32_t newOffColor, long n
       //Serial.printf("Time while LED strip is on: %u, \n\r",millis());
       delay(150);
     } // End while on-time
-    if (newLedStrip = 1) {
-      ledClimber1.fill(newOffColor,0,10);
-      ledClimber1.show();
+    if (ledStripsUsed == 1) {
+      ledClimber.fill(newOffColor,0,numLedClimber);
+      ledClimber.show();
     }
-    else if (newLedStrip = 2) {
-      ledTrap.fill(newOffColor,0,10);
+    else if (ledStripsUsed == 2) {
+      ledTrap.fill(newOffColor,0,numLedTrap);
       ledTrap.show();
     }
     nextTime = millis() + newOffTime;
@@ -131,12 +130,12 @@ void twoColor(int newLedStrip, uint32_t newOnColor, uint32_t newOffColor, long n
     } // End while off-time
   //delay(100);
   } // End while <  End Time 
-  //Serial.printf("Ending Time is %u, \n\r",millis());
-  if (newLedStrip = 1) {
-    ledClimber1.clear();
-    ledClimber1.show();
+  Serial.printf("Ending Time for Two-Color is %u secs, \n\r",int(millis()/1000));
+  if (ledStripsUsed == 1) {
+    ledClimber.clear();
+    ledClimber.show();
    }
-   else if (newLedStrip = 2) {
+   else if (ledStripsUsed == 2) {
       ledTrap.clear();
       ledTrap.show();
     }     
@@ -149,21 +148,17 @@ void setup() {
 
     //Serial.begin(115200);
     delay(3000);
-    ledClimber1.begin();
-    ledClimber1.clear();
-    //ledClimber1.setBrightness(35);
+    ledClimber.begin();
+    ledClimber.clear();
+    ledClimber.setBrightness(35);
 
-    ledClimber2.begin();
-    ledClimber2.clear();
-    //ledClimber2.setBrightness(35);
-    
     ledTrap.begin();
     ledTrap.clear();
-    //ledTrap.setBrightness(35);
+    ledTrap.setBrightness(35);
     
     ledSpeaker.begin();
     ledSpeaker.clear();
-    //ledSpeaker.setBrightness(35);
+    ledSpeaker.setBrightness(35);
 
 } // End setup()
 
@@ -326,15 +321,15 @@ void loop1() {
           currentBrightness = highBright;
         } // End "P 13"
         else if (localInt2 == 1){
-          Serial.println("Mode P 1 received: Climber Led Strip");
+          //Serial.println("Mode P 1 received: Climber Led Strip");
           ledStripsUsed = 1;
         } // End "P 1"
         else if (localInt2 == 2){
-          Serial.println("Mode P 2 received: Trap Led Strip");
+          //Serial.println("Mode P 2 received: Trap Led Strip");
           ledStripsUsed = 2;
         } // End "P 2"
         else if (localInt2 == 3){
-          Serial.println("Mode P 1 received: Climber Led Strip");
+          //Serial.println("Mode P 1 received: Climber Led Strip");
           ledStripsUsed = 3;
         } // End "P 3"
      } // end if "p_xx found"

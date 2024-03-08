@@ -23,45 +23,15 @@ void loop() {
     
     // Write a value over I2C from RoboRio to the responder
     char b[90];
-    /**
+    
+    Serial.println("Sending p 1"); // Climber Led Strip
     Wire.beginTransmission(0x30);
-    Serial.println("Starting");
-    Serial.println("Sending m 1"); // Red
-    Wire.write("m 1");
+    Wire.write("p 1");
     Wire.endTransmission();
     digitalWrite(LED_BUILTIN, HIGH);
     delay(shortTimeout);  
     digitalWrite(LED_BUILTIN, LOW);
-    delay(midTimeout); 
-    ////////////////////////////////////////////////////////////////////////////////
-    Wire.beginTransmission(0x30);
-    Serial.println("Sending m 2"); //Yellow
-    Wire.write("m 2");
-    Wire.endTransmission();
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(shortTimeout);  
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(midTimeout); 
-    ////////////////////////////////////////////////////////////////////////////////    
-    Wire.beginTransmission(0x30);
-    Serial.println("Sending m 3"); // Green
-    Wire.write("m 3");
-    Wire.endTransmission();
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(shortTimeout);  
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(midTimeout); 
-    ////////////////////////////////////////////////////////////////////////////////
-    Wire.beginTransmission(0x30);
-    Serial.println("Sending m 11"); // Flashing blue
-    Wire.write("m 11");
-    Wire.endTransmission();
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(shortTimeout);  
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(longTimeout); 
- **/
-    ////////////////////////////////////////////////////////////////////////////////
+    delay(shortTimeout);
     Serial.println("Sending p 31"); // Short time-out
     Wire.beginTransmission(0x30);
     Wire.write("p 31");
@@ -128,7 +98,7 @@ void loop() {
     delay(shortTimeout);  
     digitalWrite(LED_BUILTIN, LOW);
     delay(midTimeout); 
-    Serial.println("Sending p 32"); // Mid time-out (Default)
+    Serial.println("Sending p 32"); // Back to default: Mid time-out
     Wire.beginTransmission(0x30);
     Wire.write("p 32");
     Wire.endTransmission();
@@ -211,7 +181,7 @@ void loop() {
     delay(shortTimeout);  
     digitalWrite(LED_BUILTIN, LOW);
     delay(longTimeout); 
-    Serial.println("Sending p 22"); // Mid flash-rate (Default)
+    Serial.println("Sending p 22"); // Back to default: Mid flash-rate
     Wire.beginTransmission(0x30);
     Wire.write("p 22");
     Wire.endTransmission();
@@ -294,7 +264,7 @@ void loop() {
     delay(shortTimeout);  
     digitalWrite(LED_BUILTIN, LOW);
     delay(midTimeout); 
-    Serial.println("Sending p 12"); // Mid brightness (Default)
+    Serial.println("Sending p 12"); // Back to default: Mid brightness
     Wire.beginTransmission(0x30);
     Wire.write("p 12");
     Wire.endTransmission();
@@ -302,14 +272,5 @@ void loop() {
     delay(shortTimeout);  
     digitalWrite(LED_BUILTIN, LOW);
     delay(midTimeout); 
-     ////////////////////////////////////////////////////////////////////////////////
-    Wire.beginTransmission(0x30);
-    Serial.println("Sending m 6"); // Purple
-    Wire.write("m 6");
-    Wire.endTransmission();
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(shortTimeout);  
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(midTimeout); 
-        ////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////
 }
