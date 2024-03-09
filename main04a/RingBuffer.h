@@ -63,6 +63,15 @@ class CassiusRingBuffer {
       return NO_NUMBER;
     }
 
+    bool hasMessage () {
+      for (int i = m_tail; i != m_head; i = ( i + 1 ) % max_size) {
+        if (m_buff[i] == '\0') {
+          return true;
+        }
+      }
+      return false;
+    }
+
     bool startsWith(char const * const str) {
       size_t slen = strlen(str);
 
