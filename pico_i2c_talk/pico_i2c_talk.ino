@@ -4,7 +4,7 @@
 
 // RoboRio Test Script
 
-#define shortTimeout 500
+#define shortTimeout 1000
 #define midTimeout 5000
 #define longTimeout 10000
  
@@ -16,7 +16,7 @@ void setup() {
   Wire.setClock(100000);
   Serial.begin(115200);
   delay(5000);
-  Serial.println(" Starting RoboRio");
+  Serial.println("Starting RoboRio");
 }
 
 void loop() {
@@ -24,7 +24,7 @@ void loop() {
     // Write a value over I2C from RoboRio to the responder
     char b[90];
     
-    Serial.println("Sending p 0: Start"); // Start
+    Serial.println("Sending p 0: Start *************"); // Start
     Wire.beginTransmission(0x30);
     Wire.write("p 0");
     Wire.endTransmission();
@@ -131,7 +131,7 @@ void loop() {
     delay(shortTimeout);  
     digitalWrite(LED_BUILTIN, LOW);
     delay(shortTimeout); 
-    Serial.println("Sending m 11: Blue"); // Flashing blue
+    Serial.println("Sending m 11: Flashing Blue"); // Flashing blue
     Wire.beginTransmission(0x30);
     Wire.write("m 11");
     Wire.endTransmission();
@@ -140,7 +140,7 @@ void loop() {
     digitalWrite(LED_BUILTIN, LOW);
     delay(longTimeout);
     ////////////////////////////////////////////////////////////////////////////////
-    Serial.println("Sending p 1: Use Trap"); // Trap Led Strip
+    Serial.println("Sending p 2: Use Trap"); // Trap Led Strip
     Wire.beginTransmission(0x30);
     Wire.write("p 2");
     Wire.endTransmission();
@@ -156,7 +156,7 @@ void loop() {
     delay(shortTimeout);  
     digitalWrite(LED_BUILTIN, LOW);
     delay(shortTimeout); 
-    Serial.println("Sending m 11: Blue"); // Flashing blue
+    Serial.println("Sending m 11: Flashing Blue"); // Flashing blue
     Wire.beginTransmission(0x30);
     Wire.write("m 11");
     Wire.endTransmission();
@@ -165,7 +165,7 @@ void loop() {
     digitalWrite(LED_BUILTIN, LOW);
     delay(longTimeout);
     ////////////////////////////////////////////////////////////////////////////////        
-    Serial.println("Sending p 2: Use Speaker"); // Speaker Led Strip
+    Serial.println("Sending p 3: Use Speaker"); // Speaker Led Strip
     Wire.beginTransmission(0x30);
     Wire.write("p 3");
     Wire.endTransmission();
@@ -181,7 +181,7 @@ void loop() {
     delay(shortTimeout);  
     digitalWrite(LED_BUILTIN, LOW);
     delay(shortTimeout); 
-    Serial.println("Sending m 11: Blue"); // Flashing blue
+    Serial.println("Sending m 11: Flashing Blue"); // Flashing blue
     Wire.beginTransmission(0x30);
     Wire.write("m 11");
     Wire.endTransmission();
@@ -250,7 +250,7 @@ void loop() {
     ////////////////////////////////////////////////////////////////////////////////        
     Serial.println("Sending p 3: Use Speaker"); // Speaker Led Strip
     Wire.beginTransmission(0x30);
-    Wire.write("p 1");
+    Wire.write("p 3");
     Wire.endTransmission();
     digitalWrite(LED_BUILTIN, HIGH);
     delay(shortTimeout);  
@@ -266,7 +266,7 @@ void loop() {
     delay(shortTimeout); 
     Serial.println("Sending m 6: Purple"); // Purple              
     Wire.beginTransmission(0x30);
-    Wire.write("m 5");
+    Wire.write("m 6");
     Wire.endTransmission();
     digitalWrite(LED_BUILTIN, HIGH);
     delay(shortTimeout);  

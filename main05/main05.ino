@@ -15,9 +15,10 @@ CassiusRingBuffer buff;
 #define ledPinTrap 18       // Trap ouput pin
 #define ledPinSpeaker 20    // Speaker ouput pin
 
-#define shortTimeout 1000
-#define midTimeout 2000
-#define longTimeout 3000
+#define veryShortTimeout 200
+#define shortTimeout 5000
+#define midTimeout 10000
+#define longTimeout 15000
 
 #define fastRate 150
 #define midRate 250
@@ -51,6 +52,8 @@ int currentFlashRate = midRate;
 
 int currentBrightness = midBright;
 // Low Bright; Mid Bright; High Bright
+
+bool char_in = false;
 
 /////////////////////////////////////////////////////////////////
 
@@ -163,42 +166,7 @@ void twoColor(int newLedStrip, uint32_t newOnColor, uint32_t newOffColor, long n
 
 /////////////////////////////////////////////////////////////////
 
-void setup() {
-    //Serial.begin(115200);
-    delay(3000);
-    ledClimber.begin();
-    ledClimber.clear();
-    ledClimber.setBrightness(45);
-
-    ledTrap.begin();
-    ledTrap.clear();
-    ledTrap.setBrightness(45);
-
-    ledSpeaker.begin();
-    ledSpeaker.clear();
-    ledSpeaker.setBrightness(45);
-
-} // End setup()
-
-//////////////////////////////////////////////////////////////////////
-void loop() {    
-
-} // End loop()
-///////////////////////////////////////////////////////////////////////////////
-
-
-void setup1() {
-  //delay(5000);//////////////////////////////////////ERASE THIS AFTER TESTING
-  Wire.setSDA(8);
-  Wire.setSCL(9);
-  Wire.onReceive(recv);
-  Wire.begin(0x30);
-  Serial.begin(115200);
-  Serial.println("I2C Scanning for input..");
-}
-
-bool char_in = false;
-void loop1() {
+void checkInput() {
   delay(1000);
   Serial.println("Waiting for input");  
 
@@ -210,6 +178,10 @@ void loop1() {
       Serial.println("m-command received");
         buff.drop(2); // Drops the "m_"; Ready to read the integers
         int localInt1 = buff.getNumber();
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(veryShortTimeout);  
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(veryShortTimeout); 
         if (localInt1 == 1){
           Serial.println("Mode M 1 received: Use Red");
           if (ledStripsUsed == 1) {
@@ -295,10 +267,15 @@ void loop1() {
         Serial.println("p-command received");
         buff.drop(2); // Drops the "p_"; Ready to read the integers
         int localInt2 = buff.getNumber();
-
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(veryShortTimeout);  
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(veryShortTimeout);
+        
         switch (localInt2) {
           case 0:
             Serial.println("Mode P 0 received: Start *****************");
+            Serial.printf("Running Time is %u secs\n\r",int(millis()/1000));
             break;
           case 1:
             Serial.println("Mode P 1 received: Use Climber Led Strip");
@@ -367,6 +344,48 @@ void loop1() {
      } // end else
      } // end while has-message is true
     } // end if char-in is true
+} // End checkInput()
+/////////////////////////////////////////////////////////////////
+
+
+
+void setup() {
+    //Serial.begin(115200);
+    delay(3000);
+    ledClimber.begin();
+    ledClimber.clear();
+    ledClimber.setBrightness(45);
+
+    ledTrap.begin();
+    ledTrap.clear();
+    ledTrap.setBrightness(45);
+
+    ledSpeaker.begin();
+    ledSpeaker.clear();
+    ledSpeaker.setBrightness(45);
+
+} // End setup()
+
+//////////////////////////////////////////////////////////////////////
+void loop() {    
+  checkInput();
+} // End loop()
+///////////////////////////////////////////////////////////////////////////////
+
+
+void setup1() {
+  //delay(5000);//////////////////////////////////////ERASE THIS AFTER TESTING
+  pinMode(LED_BUILTIN, OUTPUT);
+  Wire.setSDA(8);
+  Wire.setSCL(9);
+  Wire.onReceive(recv);
+  Wire.begin(0x30);
+  Serial.begin(115200);
+  Serial.println("I2C Scanning for input..");
+}
+
+void loop1() {
+
 }//end of loop1()
 
 
