@@ -1,0 +1,32 @@
+Starting RoboRio Script
+Sending p 0: Start *************
+Sending p 1: Use Climber
+Sending p 31: Use short time-out
+Sending m 1: Red
+Sending p 2: Use Trap
+Sending p 32: Use mid time-out
+Sending m 2: Yellow
+Sending p 3: Use Speaker
+Sending p 33: Use long time-out
+Sending m 3: Green
+Sending p 32: Use mid time-out (default)
+Sending p 1: Use Climber
+Sending p 21: Use slow flash-rate
+Sending m 11: Flashing Blue
+Sending p 2: Use Trap
+Sending p 22: Use mid flash rate
+Sending m 11: Flashing Blue
+Sending p 3: Use Speaker
+Sending p 23: Use high flash-rate
+Sending m 11: Flashing Blue
+Sending p 22: Use mid flash-rate (default)
+Sending p 1: Use Climber
+Sending p 11: Use low brightness
+Sending m 5: Orange
+Sending p 2: Use Trap
+Sending p 12: Use mid brightness
+Sending m 2: Yellow
+Sending p 3: Use Speaker
+Sending p 13: Use high brightness
+Sending m 6: Purple
+Sending p 12: Use mid brightness (default)

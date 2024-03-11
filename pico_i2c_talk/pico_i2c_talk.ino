@@ -72,7 +72,7 @@ void loop() {
     digitalWrite(LED_BUILTIN, HIGH);
     delay(shortTimeout);  
     digitalWrite(LED_BUILTIN, LOW);
-    delay(midTimeout); 
+    delay(shortTimeout); 
     Serial.println("Sending m 2: Yellow"); // Yellow
     Wire.beginTransmission(0x30);
     Wire.write("m 2");
