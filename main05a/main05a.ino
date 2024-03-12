@@ -16,9 +16,9 @@ CassiusRingBuffer buff;
 #define ledPinSpeaker 20    // Speaker ouput pin
 
 #define veryShortTimeout 200
-#define shortTimeout 5000
-#define midTimeout 10000
-#define longTimeout 15000
+#define shortTimeout 60000
+#define midTimeout 60000
+#define longTimeout 60000
 
 #define fastRate 150
 #define midRate 250
@@ -73,13 +73,27 @@ bool char_in = false;
 
 /////////////////////////////////////////////////////////////////
 
+void clearAll(){
+  Serial.println("Clear All");
+  runOneColor = false;
+  runTwoColor = false;
+  ledClimber.clear();
+  delay(100);
+  ledClimber.show();
+  ledTrap.clear();
+  delay(100);
+  ledTrap.show();
+  ledSpeaker.clear();
+  delay(100);
+  ledSpeaker.show();
+}
 void oneColor(int newLedStrip, int newColor, long newDuration) {
   //Serial.println("Starting oneColor() ");
   if (runOneColor) {
     Serial.println("Run One color is true");
   }
   else if (!runOneColor)  {
-    Serial.println("Run One color is false");
+    //Serial.println("Run One color is false");
   }
     long endTime = millis() + newDuration;
     //Serial.printf("oneColor: End Time is: %u, \n\r",endTime);
@@ -126,7 +140,7 @@ void twoColor(int newLedStrip, uint32_t newOnColor, uint32_t newOffColor, long n
     Serial.println("Run Two color is true");
   }
   else if (!runTwoColor)  {
-    Serial.println("Run Two color is false");
+    //Serial.println("Run Two color is false");
   }
   long endTime = millis() + newDuration;
   long currentTime = millis();
@@ -199,6 +213,7 @@ void checkInput() {
       //Serial.printf("Buff: !empty %d\r\n", buff.size());
       if (buff.startsWith("m ")) {
         Serial.println("m-command received");
+        clearAll();
         buff.drop(2); // Drops the "m_"; Ready to read the integers
         int localInt1 = buff.getNumber();
         digitalWrite(LED_BUILTIN, HIGH);
