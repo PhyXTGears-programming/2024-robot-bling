@@ -1,8 +1,4 @@
-// Shows how to use SPISlave on a single device.
-// Core0 runs as an SPI RoboRio and initiates a transmission to the Pico
-// Core1 runs the SPI Slave mode and provides a unique reply to messages from the RoboRio
-//
-// Released to the public domain 2023 by Earle F. Philhower, III <earlephilhower@yahoo.com>
+// SPI to Myself
 
 #include <SPI.h>
 #include "SPISlave.h"
