@@ -22,7 +22,7 @@
 
 #include <Arduino.h>
 #include <api/HardwareSPI.h>
-#include <hardware/SPI.h>
+#include <SPI.h>
 #include <functional>
 
 typedef std::function<void(uint8_t *data, size_t len)> SPISlaveRecvHandler;

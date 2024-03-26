@@ -21,7 +21,6 @@ void blinkLed(int localTimeOut){
     digitalWrite(LED_BUILTIN, HIGH);
     delay(localTimeOut);  
     digitalWrite(LED_BUILTIN, LOW);
-    delay(localTimeOut);
 }
 
 void msgOut(std::string localMsg);
@@ -41,6 +40,12 @@ void m_1(){
     msgOut("m 1");
 }
 
+void m_2(){
+    Serial.println("Sending m 2: Yellow"); // Yellow
+    msgOut("m 2");
+}
+
+
 void msgOut(std::string localMsg){
   SPI.beginTransaction(spisettings);
   SPI.transfer((void *)localMsg.c_str(), localMsg.size() + 1);
@@ -50,10 +55,10 @@ void msgOut(std::string localMsg){
 
 void setup() {
   Serial.begin();
-  SPI.setRX(0);
-  SPI.setCS(1);
-  SPI.setSCK(2);
-  SPI.setTX(3);
+  SPI.setRX(0);  // Pin 1
+  SPI.setCS(1);  // Pin 2
+  SPI.setSCK(2); // Pin 4
+  SPI.setTX(3);  // Pin 5
   SPI.begin();
   pinMode(LED_BUILTIN, OUTPUT);
   delay(5000);
@@ -62,10 +67,8 @@ void setup() {
 void loop() {
     p_0(); // Start
     blinkLed(veryShortTimeout); 
-    ///////////////////////////////////////////////////////////
-    p_31(); // Short time-out
-    blinkLed(veryShortTimeout); 
     m_1();// Red
     blinkLed(midTimeout); 
-    delay(100);
+    m_2();// Yellow
+    blinkLed(midTimeout); 
 }

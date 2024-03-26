@@ -41,7 +41,7 @@ void loop() {
   Serial.printf("RoboRio from Pico Receiving: '%s'\n", msg);
   transmits++;
   delay(5000);
-  blinkLed();
+  //blinkLed();
 }
 
 // Core 1 will be SPI Pico
@@ -88,8 +88,8 @@ void setup1() {
 
 void loop1() {
   if (recvBuffReady) {
-    
-    Serial.printf("Pico-Receiving: '%s'\n", recvBuff);
+    blinkLed();
+    Serial.printf("*** Pico-Receiving: '%s'\n", recvBuff);
     recvBuffReady = false;
   }
 }
